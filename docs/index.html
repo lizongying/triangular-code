@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>三角碼</title>
+    <meta name="keywords" content="三角碼"/>
+    <meta name="description" content="三角碼"/>
+    <script src="triangular-code.min.js"></script>
+    <script>
+        window.onload = () => {
+            const container = document.querySelector('#svg');
+            const input = document.querySelector('#input');
+            const header = document.querySelector('header');
+
+            const instance = new TriangularCode(container, 400);
+
+            const copyValue = () => {
+                instance.encode(input.value);
+            }
+
+            copyValue();
+
+            input.addEventListener('input', () => {
+                copyValue()
+            });
+
+            let hide = false
+            const action = document.querySelector('#floating-action-button')
+            action.onclick = () => {
+                if (!hide) {
+                    input.style.display = 'none';
+                    header.style.display = 'none';
+                    action.innerText = '顯';
+                } else {
+                    input.style.display = 'block';
+                    header.style.display = 'grid';
+                    action.innerText = '隱';
+                }
+                hide = !hide
+            }
+
+            document.querySelector('#export').onclick = (e) => {
+                e.preventDefault();
+                const svg = container.querySelector('svg');
+                const serializer = new XMLSerializer();
+                const svgString = serializer.serializeToString(svg);
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+                const url = URL.createObjectURL(svgBlob);
+                img.onload = () => {
+                    canvas.width = svg.width.baseVal.value;
+                    canvas.height = svg.height.baseVal.value;
+                    ctx.drawImage(img, 0, 0);
+                    const link = document.createElement('a');
+                    link.download = 'triangular-code.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    URL.revokeObjectURL(url);
+                };
+                img.src = url;
+            }
+        }
+    </script>
+    <style>
+        body {
+            direction: rtl;
+            display: flex;
+            align-items: normal;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Source Han Serif TC', 'SimSun-ExtB', 'MingLiU', serif;
+            background-color: #f7f6f5;
+        }
+
+        header {
+            display: grid;
+            align-items: flex-end;
+        }
+
+        h1 {
+            margin: .5em;
+            writing-mode: vertical-rl;
+            white-space: nowrap;
+        }
+
+        .links {
+            direction: ltr;
+            font-size: 16px;
+            text-align: right;
+            list-style-type: none;
+            padding: 1em;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        #input, #output {
+            width: 100%;
+            height: 100%;
+            resize: none;
+            padding: .5em;
+            box-sizing: border-box;
+            font-size: 24px;
+            color: #444;
+            direction: ltr;
+            font-family: 'Source Han Serif TC', 'SimSun-ExtB', 'MingLiU', serif;
+        }
+
+        #input {
+            outline: none;
+            border: none;
+        }
+
+        #output {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #svg {
+            display: flex;
+        }
+
+        .floating-action-button {
+            position: fixed;
+            left: 1em;
+            bottom: 1.5em;
+            width: 56px;
+            height: 56px;
+            background-color: #8B0000;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
+            user-select: none;
+        }
+
+        .floating-action-button:active {
+            background-color: #e91e63;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>三角碼（金字塔碼）</h1>
+    <ul class="links">
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>
+        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>
+    </ul>
+</header>
+<div class="container">
+    <label for="input"></label>
+    <textarea id="input" placeholder="文本"></textarea>
+    <div id="output">
+        <div><a id="export" href="javascript:">導出</a></div>
+        <div id="svg"></div>
+    </div>
+</div>
+<div id="floating-action-button" class="floating-action-button">
+    隱
+</div>
+</body>
+</html>
