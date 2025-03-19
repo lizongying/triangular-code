@@ -1,6 +1,6 @@
-# 三角碼
+# 三角碼（Triangular Code）
 
-一種三角形的二維碼，js實現
+一種三角形的二維碼
 
 別名：金字塔碼（Pyramid Code）
 
