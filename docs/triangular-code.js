@@ -4,11 +4,22 @@
  */
 class TriangularCode {
 
-    constructor(container, size = 200) {
-        this.size = size;
-        const scale = Math.sin(this.degreesToRadians(60));
+    constructor(container, size = 200, color = 'green', colorBackground = 'white', text = '') {
+        this.container = container;
+        this.scale = Math.sin(this.degreesToRadians(60));
 
         this._svgNamespace = 'http://www.w3.org/2000/svg';
+
+        this.color = color;
+        this.colorBackground = colorBackground;
+        this.text = text;
+
+        this.updateSize(size);
+    }
+
+    updateSize(size) {
+        this.size = size;
+        const container = this.container;
         let svg = container.querySelector('svg');
         if (svg) {
             while (svg.firstChild) {
@@ -16,13 +27,31 @@ class TriangularCode {
             }
         } else {
             svg = document.createElementNS(this._svgNamespace, 'svg');
-            svg.setAttribute('transform', `scale(1,${scale})`);
+            svg.setAttribute('transform', `scale(1,${this.scale})`);
             container.appendChild(svg);
         }
         svg.setAttribute('width', `${size}`);
         svg.setAttribute('height', `${size}`);
         svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
         this._svg = svg;
+        this.encode();
+    }
+
+    updateText(text) {
+        this.text = text;
+        const container = this.container;
+        let svg = container.querySelector('svg');
+        if (svg) {
+            while (svg.firstChild) {
+                svg.removeChild(svg.firstChild);
+            }
+        } else {
+            svg = document.createElementNS(this._svgNamespace, 'svg');
+            svg.setAttribute('transform', `scale(1,${this.scale})`);
+            container.appendChild(svg);
+        }
+        this._svg = svg;
+        this.encode();
     }
 
     degreesToRadians(degrees) {
@@ -37,9 +66,27 @@ class TriangularCode {
             .map(Number);
     }
 
-    encode(text, color = 'green', colorBackground = 'white') {
+    encode(text = this.text) {
+        this.text = text;
+        const color = this.color;
+        const colorBackground = this.colorBackground;
         let data = this.stringToBinary(text);
         console.log('data', data);
+
+        const numDataSymbols = 5; // 数据符号的数量
+        const numParitySymbols = 2; // 冗余符号的数量
+// 创建 Reed-Solomon 编码器
+        const encoder = new ReedSolomon(numDataSymbols, numParitySymbols);
+// 编码数据
+        const encoded = encoder.encode(data);
+        console.log('Encoded Data:', encoded);
+// 模拟数据丢失（例如，丢失最后两个符号）
+        const received = encoded.slice(0, -2).concat([0, 0]); // 失去最后两个符号
+// 解码数据
+        const decoder = new ReedSolomon(numDataSymbols, numParitySymbols);
+        const decoded = decoder.decode(received);
+        console.log('Decoded Data:', decoded);
+
 
         if (data.length < 32) {
             data = data.concat(new Array(32 - data.length).fill(0));

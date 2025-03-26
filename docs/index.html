@@ -12,17 +12,18 @@
         window.onload = () => {
             const svg = document.querySelector('#svg');
             const input = document.querySelector('#input');
+            const slider = document.querySelector('#slider');
 
-            const instance = new TriangularCode(svg, 200);
-
-            const copyValue = () => {
-                instance.encode(input.value);
-            }
-
-            copyValue();
+            let size = 200;
+            slider.value = size;
+            const instance = new TriangularCode(svg, size);
 
             input.addEventListener('input', () => {
-                copyValue()
+                instance.updateText(input.value);
+            });
+
+            slider.addEventListener('input', () => {
+                instance.updateSize(Number(slider.value))
             });
 
             let hide = false
@@ -93,6 +94,7 @@
             display: grid;
             align-items: flex-end;
             max-width: 5em;
+            overflow: scroll;
         }
 
         h1 {
@@ -105,6 +107,10 @@
         .actions {
             list-style-type: none;
             padding: 1em;
+        }
+
+        .actions li {
+            text-align: center;
         }
 
         .links {
@@ -134,7 +140,7 @@
             outline: none;
             border: none;
             min-width: 2em;
-            max-width: 5em;
+            max-width: 6em;
         }
 
         #output {
@@ -180,8 +186,15 @@
     <aside class="aside">
         <h1>三角碼（金字塔碼）</h1>
         <ul class="actions">
+            <li>
+                <div style="display: inline-flex; width: 1em; height: 5em; justify-content: center">
+                    <input id="slider" style="display: flex; width: 5em; height: 5em; transform: rotate(-90deg);"
+                           type="range" min="200" max="400">
+                </div>
+            </li>
             <li><a id="export" href="javascript:">導出</a></li>
         </ul>
+
         <ul class="links">
             <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>
             <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>
