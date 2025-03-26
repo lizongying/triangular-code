@@ -4,23 +4,15 @@
 
 別名：金字塔碼（Pyramid Code）
 
-* 外觀為三角形，和常見的二維碼很大不同，可能適合特殊領域或商品
+* 外觀為三角形
 
-[doc](https://lizongying.github.io/triangular-code/)
-
-[npm](https://www.npmjs.com/package/triangular-code/)
-
-[js](https://github.com/lizongying/triangular-code/)
-
-[python](https://github.com/lizongying/triangular-code/)
-
-[rust](https://github.com/lizongying/triangular-code/)
+[三角碼](https://lizongying.github.io/triangular-code/)
 
 ![](screenshots/img_1.png)
 
 ## 使用
 
-* 可以在這裡體驗：[doc](https://lizongying.github.io/triangular-code/)
+* 可以在這裡體驗：[三角碼](https://lizongying.github.io/triangular-code/)
 
 ## 讚賞
 
