@@ -16,20 +16,11 @@
 
 [rust](https://github.com/lizongying/triangular-code/)
 
-![](screenshots/img.png)
+![](screenshots/img_1.png)
 
 ## 使用
 
-### node
-
-```
-npm i triangular-code
-```
-
-### browser
-
-```html
-```
+* 可以在這裡體驗：[doc](https://lizongying.github.io/triangular-code/)
 
 ## 讚賞
 
