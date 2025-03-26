@@ -73,21 +73,6 @@ class TriangularCode {
         let data = this.stringToBinary(text);
         console.log('data', data);
 
-        const numDataSymbols = 5; // 数据符号的数量
-        const numParitySymbols = 2; // 冗余符号的数量
-// 创建 Reed-Solomon 编码器
-        const encoder = new ReedSolomon(numDataSymbols, numParitySymbols);
-// 编码数据
-        const encoded = encoder.encode(data);
-        console.log('Encoded Data:', encoded);
-// 模拟数据丢失（例如，丢失最后两个符号）
-        const received = encoded.slice(0, -2).concat([0, 0]); // 失去最后两个符号
-// 解码数据
-        const decoder = new ReedSolomon(numDataSymbols, numParitySymbols);
-        const decoded = decoder.decode(received);
-        console.log('Decoded Data:', decoded);
-
-
         if (data.length < 32) {
             data = data.concat(new Array(32 - data.length).fill(0));
         }
