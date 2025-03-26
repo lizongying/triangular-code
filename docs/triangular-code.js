@@ -1,3 +1,7 @@
+/**
+ * @license
+ * https://github.com/lizongying/triangular-code
+ */
 class TriangularCode {
 
     constructor(container, size = 200) {
@@ -12,12 +16,12 @@ class TriangularCode {
             }
         } else {
             svg = document.createElementNS(this._svgNamespace, 'svg');
-            svg.setAttribute('width', `${size}`);
-            svg.setAttribute('height', `${size}`);
-            svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
             svg.setAttribute('transform', `scale(1,${scale})`);
             container.appendChild(svg);
         }
+        svg.setAttribute('width', `${size}`);
+        svg.setAttribute('height', `${size}`);
+        svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
         this._svg = svg;
     }
 

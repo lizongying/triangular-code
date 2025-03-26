@@ -10,11 +10,10 @@
     <script src="triangular-code.min.js"></script>
     <script>
         window.onload = () => {
-            const container = document.querySelector('#svg');
+            const svg = document.querySelector('#svg');
             const input = document.querySelector('#input');
-            const header = document.querySelector('header');
 
-            const instance = new TriangularCode(container, 400);
+            const instance = new TriangularCode(svg, 200);
 
             const copyValue = () => {
                 instance.encode(input.value);
@@ -27,15 +26,19 @@
             });
 
             let hide = false
-            const action = document.querySelector('#floating-action-button')
+            const container = document.querySelector('.container');
+            const aside = document.querySelector('.aside');
+            const action = document.querySelector('#action');
             action.onclick = () => {
                 if (!hide) {
                     input.style.display = 'none';
-                    header.style.display = 'none';
+                    container.style.width = '100%';
+                    aside.style.display = 'none';
                     action.innerText = '顯';
                 } else {
-                    input.style.display = 'block';
-                    header.style.display = 'grid';
+                    input.style.display = 'flex';
+                    container.style.width = 'calc(100% - 5em)';
+                    aside.style.display = 'grid';
                     action.innerText = '隱';
                 }
                 hide = !hide
@@ -66,25 +69,42 @@
         }
     </script>
     <style>
-        body {
-            direction: rtl;
-            display: flex;
-            align-items: normal;
-            height: 100vh;
+        html, body {
+            height: 100%;
             margin: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
             font-family: 'Source Han Serif TC', 'SimSun-ExtB', 'MingLiU', serif;
             background-color: #f7f6f5;
         }
 
-        header {
+        .main {
+            direction: rtl;
+            display: flex;
+            align-items: normal;
+            height: 100%;
+        }
+
+        .aside {
             display: grid;
             align-items: flex-end;
+            max-width: 5em;
         }
 
         h1 {
+            font-size: 2em;
             margin: .5em;
             writing-mode: vertical-rl;
             white-space: nowrap;
+        }
+
+        .actions {
+            list-style-type: none;
+            padding: 1em;
         }
 
         .links {
@@ -97,39 +117,39 @@
 
         .container {
             display: flex;
-            width: 100%;
-            height: 100%;
+            width: calc(100% - 5em);
         }
 
         #input, #output {
-            width: 100%;
-            height: 100%;
+            display: flex;
             resize: none;
             padding: .5em;
             box-sizing: border-box;
             font-size: 24px;
             color: #444;
             direction: ltr;
-            font-family: 'Source Han Serif TC', 'SimSun-ExtB', 'MingLiU', serif;
         }
 
         #input {
             outline: none;
             border: none;
+            min-width: 2em;
+            max-width: 5em;
         }
 
         #output {
-            display: flex;
+            flex: 1;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            overflow: scroll;
         }
 
         #svg {
             display: flex;
         }
 
-        .floating-action-button {
+        .action {
             position: fixed;
             left: 1em;
             bottom: 1.5em;
@@ -150,34 +170,39 @@
             user-select: none;
         }
 
-        .floating-action-button:active {
+        .action:active {
             background-color: #e91e63;
         }
     </style>
 </head>
 <body>
-<header>
-    <h1>三角碼（金字塔碼）</h1>
-    <ul class="links">
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>
-        <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>
-    </ul>
-</header>
-<div class="container">
-    <label for="input"></label>
-    <textarea id="input" placeholder="文本"></textarea>
-    <div id="output">
-        <div><a id="export" href="javascript:">導出</a></div>
-        <div id="svg"></div>
+<main class="main">
+    <aside class="aside">
+        <h1>三角碼（金字塔碼）</h1>
+        <ul class="actions">
+            <li><a id="export" href="javascript:">導出</a></li>
+        </ul>
+        <ul class="links">
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>
+        </ul>
+    </aside>
+    <div class="container">
+        <label for="input"></label>
+        <textarea id="input" placeholder="文本"></textarea>
+        <div id="output">
+            <div id="svg"></div>
+        </div>
     </div>
-</div>
-<div id="floating-action-button" class="floating-action-button">
-    隱
-</div>
+    <div id="action" class="action">
+        隱
+    </div>
+</main>
+
 </body>
 </html>

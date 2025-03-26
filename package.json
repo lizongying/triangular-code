@@ -4,7 +4,7 @@
   "description": "三角碼，js實現",
   "main": "docs/triangular-code.min.js",
   "scripts": {
-    "build": "npx terser docs/triangular-code.js --comments 'https://github.com/lizongying/triangular-code' -o docs/triangular-code.min.js"
+    "build": "npx terser docs/triangular-code.js --compres --mangle -o docs/triangular-code.min.js"
   },
   "repository": {
     "type": "git",
