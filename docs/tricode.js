@@ -1,7 +1,7 @@
 /**
  * https://github.com/lizongying/triangular-code
  */
-class TriangularCode {
+class Tricode {
     constructor(container, text = '', bits = 3, size = 200) {
         this.container = container;
         this.scale = Math.sin(this.degreesToRadians(60));

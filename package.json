@@ -1,28 +1,27 @@
 {
-  "name": "triangular-code",
+  "name": "tricode",
   "version": "0.0.1",
   "description": "三角碼，js實現",
   "type": "module",
-  "main": "docs/triangular-code.min.js",
+  "main": "docs/tricode.min.js",
   "scripts": {
-    "build": "npx terser docs/triangular-code.js --compres --mangle -o docs/triangular-code.min.js"
+    "build": "npx terser docs/tricode.js --compres --mangle -o docs/tricode.min.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lizongying/triangular-code.git"
+    "url": "git+https://github.com/lizongying/tricode.git"
   },
   "keywords": [
     "三角碼",
-    "triangular-code",
-    "tri-code",
+    "tricode",
     "tc"
   ],
   "author": "Li ZongYing",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/lizongying/triangular-code/issues"
+    "url": "https://github.com/lizongying/tricode/issues"
   },
-  "homepage": "https://lizongying.github.io/triangular-code/",
+  "homepage": "https://lizongying.github.io/tricode/",
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",

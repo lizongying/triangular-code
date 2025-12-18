@@ -7,7 +7,7 @@
     <title>三角碼</title>
     <meta name="keywords" content="三角碼"/>
     <meta name="description" content="三角碼"/>
-    <script src="triangular-code.min.js"></script>
+    <script src="tricode.min.js"></script>
     <script>
         window.onload = () => {
             const svg = document.querySelector('#svg');
@@ -18,7 +18,7 @@
 
             let size = 200;
             slider.value = size;
-            let instance = new TriangularCode(svg, '', Number(bits.value), size);
+            let instance = new Tricode(svg, '', Number(bits.value), size);
 
             input.addEventListener('input', () => {
                 instance.updateText(input.value);
@@ -231,13 +231,13 @@
         </ul>
 
 <!--        <ul class="links">-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>-->
-<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Py</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Rust</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Go</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Js</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Kotlin</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">Php</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/tricode">C#</a></li>-->
 <!--        </ul>-->
     </aside>
     <div class="container">
