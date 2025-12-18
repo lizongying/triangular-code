@@ -1,14 +1,13 @@
-# 三角碼（Triangular Code）
+# 三角碼（TC）
 
 一種三角形的二維碼
 
-別名：金字塔碼（Pyramid Code）
-
 * 外觀為三角形
+* 支持雙色、四色、八色
 
 [體驗](https://lizongying.github.io/triangular-code/)
 
-![](screenshots/img_1.png)
+![](screenshots/img.png)
 
 ## 讚賞
 

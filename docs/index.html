@@ -13,10 +13,12 @@
             const svg = document.querySelector('#svg');
             const input = document.querySelector('#input');
             const slider = document.querySelector('#slider');
+            const bits = document.querySelector('[name="bits"][checked]');
+            console.log('bits', bits.value)
 
             let size = 200;
             slider.value = size;
-            const instance = new TriangularCode(svg, size);
+            let instance = new TriangularCode(svg, '', Number(bits.value), size);
 
             input.addEventListener('input', () => {
                 instance.updateText(input.value);
@@ -60,13 +62,24 @@
                     canvas.height = svg.height.baseVal.value;
                     ctx.drawImage(img, 0, 0);
                     const link = document.createElement('a');
-                    link.download = 'triangular-code.png';
+                    link.download = 'tc.png';
                     link.href = canvas.toDataURL('image/png');
                     link.click();
                     URL.revokeObjectURL(url);
                 };
                 img.src = url;
             }
+
+            // document.querySelector('button').onclick = _ => {
+            //     input.value = Number(input.value) + 1
+            //     instance.updateText(input.value);
+            // }
+
+            document.querySelectorAll('input[name="bits"]').forEach(checkbox => {
+                checkbox.addEventListener('change', (event) => {
+                    instance.updateColor(Number(Number(event.target.value)))
+                });
+            });
         }
     </script>
     <style>
@@ -179,12 +192,30 @@
         .action:active {
             background-color: #e91e63;
         }
+
+        @media (max-width: 480px) {
+            .container {
+                flex-direction: column;
+            }
+
+            #input {
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
 <main class="main">
     <aside class="aside">
-        <h1>三角碼（金字塔碼）</h1>
+        <h1>三角碼</h1>
+        <div>
+            <input type="radio" id="bits1" name="bits" value="1">
+            <label for="bits1">雙色</label><br>
+            <input type="radio" id="bits2" name="bits" value="2">
+            <label for="bits2">四色</label><br>
+            <input type="radio" id="bits3" name="bits" value="3" checked>
+            <label for="bits3">八色</label><br><br>
+        </div>
         <ul class="actions">
             <li>
                 <div style="display: inline-flex; width: 1em; height: 5em; justify-content: center">
@@ -196,18 +227,23 @@
         </ul>
 
         <ul class="links">
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>
-            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>
+            <li><a target="_blank" href="https://github.com/lizongying/triangular-code/js/index2.html">掃描</a></li>
         </ul>
+
+<!--        <ul class="links">-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Py</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Rust</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Go</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Js</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Kotlin</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">Php</a></li>-->
+<!--            <li><a target="_blank" href="https://github.com/lizongying/triangular-code">C#</a></li>-->
+<!--        </ul>-->
     </aside>
     <div class="container">
+        <!--        <button>+1</button>-->
         <label for="input"></label>
-        <textarea id="input" placeholder="文本"></textarea>
+        <textarea id="input" placeholder="請輸入文本"></textarea>
         <div id="output">
             <div id="svg"></div>
         </div>
@@ -218,4 +254,7 @@
 </main>
 
 </body>
+<script>
+
+</script>
 </html>
