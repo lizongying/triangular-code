@@ -80,14 +80,17 @@ class Tricode {
      * @returns {number[]} - An array of bits.
      */
     stringToBits(str) {
-        const encoder = new TextEncoder();
-        const byteArray = encoder.encode(str);
+        const encoder = new TextEncoder()
+        const coreBytes = encoder.encode(str)
+        // 2. 拼接1个0作为\0分隔符（仅1个，满足分隔需求）
+        let byteArray = new Uint8Array(coreBytes.length + 1);
+        byteArray.set(coreBytes); // 复制核心字节
+        byteArray[coreBytes.length] = 0; // 末尾加1个0（\0分隔符）
 
         const sign = '01'
         const signArr = [0, 1]
         switch (this.bits) {
             case 3: {
-                // 1. 將 byteArray 轉換成 bit 序列（例如 [0b11001010, 0b00011111] → "1100101000011111"）
                 let bitString = sign
                 for (const byte of byteArray) {
                     bitString += byte.toString(2).padStart(8, '0')
@@ -97,11 +100,12 @@ class Tricode {
                     bitString += '0'
                 }
 
-                // 3. 每 3 bits 一組，轉換回數字
-                const res = [];
+                console.log('bitString', bitString)
+
+                const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
-                    const triplet = bitString.slice(i, i + 3);
-                    res.push(parseInt(triplet, 2)); // 3-bit 二進制轉十進制
+                    console.log(999999, bitString.slice(i, i + 3))
+                    res.push(parseInt(bitString.slice(i, i + 3), 2))
                 }
 
                 return res
@@ -112,10 +116,9 @@ class Tricode {
                     bitString += byte.toString(2).padStart(8, '0')
                 }
 
-                const res = [];
+                const res = []
                 for (let i = 0; i < bitString.length; i += 2) {
-                    const triplet = bitString.slice(i, i + 2);
-                    res.push(parseInt(triplet, 2))
+                    res.push(parseInt(bitString.slice(i, i + 2), 2))
                 }
 
                 return res
@@ -137,7 +140,6 @@ class Tricode {
         const signArr = [0, 0]
         switch (this.bits) {
             case 3: {
-                // 1. 將 byteArray 轉換成 bit 序列（例如 [0b11001010, 0b00011111] → "1100101000011111"）
                 let bitString = sign
                 for (const bit of bitArray) {
                     bitString += bit
@@ -147,11 +149,9 @@ class Tricode {
                     bitString += '0'
                 }
 
-                // 3. 每 3 bits 一組，轉換回數字
-                const res = [];
+                const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
-                    const triplet = bitString.slice(i, i + 3);
-                    res.push(parseInt(triplet, 2)); // 3-bit 二進制轉十進制
+                    res.push(parseInt(bitString.slice(i, i + 3), 2))
                 }
 
                 return res
@@ -162,10 +162,9 @@ class Tricode {
                     bitString += bit
                 }
 
-                const res = [];
+                const res = []
                 for (let i = 0; i < bitString.length; i += 2) {
-                    const triplet = bitString.slice(i, i + 2);
-                    res.push(parseInt(triplet, 2))
+                    res.push(parseInt(bitString.slice(i, i + 2), 2))
                 }
 
                 return res
@@ -178,7 +177,54 @@ class Tricode {
     }
 
     defaultColor() {
-        return 0
+        let colors = colors2
+        switch (this.bits) {
+            case 3: {
+                colors = 8
+                break
+            }
+            case 2: {
+                colors = 4
+                break
+            }
+            default : {
+                colors = 2
+            }
+
+        }
+        return Math.floor(Math.random() * colors)
+    }
+
+    /**
+     * 生成填充段（随机颜色，替代固定默认色）
+     * @param {number} fillLength - 二维码总模块数
+     * @returns {Array} 随机填充的数组
+     */
+    fillRandomColor(fillLength) {
+        if (fillLength <= 0) return []
+
+        let colorCount = 2
+        switch (this.bits) {
+            case 3: {
+                colorCount = 8
+                break
+            }
+            case 2: {
+                colorCount = 4
+                break
+            }
+            case 1: {
+                colorCount = 2
+                break
+            }
+            default : {
+                colorCount = 2
+            }
+        }
+
+        return Array.from({length: fillLength}, () => {
+            return Math.floor(Math.random() * colorCount)
+        })
     }
 
     /**
@@ -195,7 +241,8 @@ class Tricode {
             throw new Error(`Data length (${data.length}) exceeds capacity (${capacity}) for TC version ${version}`)
         }
         if (data.length < capacity) {
-            return data.concat(new Array(capacity - data.length).fill(this.defaultColor()));
+            // return data.concat(new Array(capacity - data.length).fill(0))
+            return data.concat(this.fillRandomColor(capacity - data.length))
         }
         return data
     }
@@ -238,7 +285,7 @@ class Tricode {
         console.log('data', data)
 
         const {version, capacity} = this.getRequiredVersion(data.length);
-        console.log(`version: ${version}, capacity: ${capacity}`);
+        console.log(`version: ${version}, capacity: ${capacity}`)
 
         // const a = 32
         // if (data.length < a) {

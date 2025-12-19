@@ -544,10 +544,7 @@ export function packBitsToBytes(bitsArray, bits = 1) {
                 originalLength = (originalLength << 1) | i
             }
 
-            console.log('len1', originalLength)
-
             const bitsStr = bitsArray.slice(10).join('')
-            console.log('bitsStr', bitsStr)
 
             // 4. 解析數據位（長度欄位後的部分）
             const dataStart = 0;
@@ -594,62 +591,22 @@ export function packBitsToBytes(bitsArray, bits = 1) {
             if (content.length !== originalLength) {
                 throw new Error("還原的數字串長度與標註長度不匹配，位元串可能損壞");
             }
-
-
-            console.log('content', content)
-
-            //
-            // // 循环处理，直到读完所有数字
-            // while (content.length < len) {
-            //     // 计算当前还能读多少位（避免越界）
-            //     const remainingDigits = len - content.length
-            //     console.log('remainingDigits', remainingDigits)
-            //     if (remainingDigits >= 3) {
-            //         // 情况1：完整3位二进制
-            //         const decimal =
-            //             (bitsArray[bitPos] << 2) |
-            //             (bitsArray[bitPos + 1] << 1) |
-            //             bitsArray[bitPos + 2]
-            //         content += decimal
-            //         console.log('decimal3', decimal, bitPos)
-            //         console.log('content',  content)
-            //         bitPos += 3
-            //     } else if (remainingDigits === 2) {
-            //         // 情况2：剩余2位二进制
-            //         const decimal =
-            //             (bitsArray[bitPos] << 1) |
-            //             bitsArray[bitPos + 1]
-            //         content += decimal
-            //         bitPos += 2
-            //         console.log('decimal2', decimal)
-            //         break
-            //     } else {
-            //         // 情况3：剩余1位二进制
-            //         content += bitsArray[bitPos]
-            //         bitPos += 1
-            //         console.log('decimal1', bitsArray[bitPos])
-            //         break
-            //     }
-            // }
             break
         }
         case 1: {
             // utf8
             for (const bit of bitsArray) {
-                buffer = (buffer << 1) | bit; // 左移 1 位并加上当前 bit
-                count++;
+                buffer = (buffer << 1) | bit
+                count++
                 if (count === 8) {
-                    bytes.push(buffer); // 每 8 位存 1 字节
-                    buffer = 0;
-                    count = 0;
+                    if (buffer===0) {
+                        break
+                    }
+                    bytes.push(buffer)
+                    buffer = 0
+                    count = 0
                 }
             }
-
-            // 如果不足 8 位，补 0 并存储
-            // if (count > 0) {
-            //     buffer <<= (8 - count); // 左移补 0
-            //     bytes.push(buffer);
-            // }
 
             content = decodeUtf8Bytes(bytes)
             break
