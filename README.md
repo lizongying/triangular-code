@@ -5,10 +5,10 @@
 * 外觀為三角形
 * 支持雙色、四色、八色
 
-[體驗](https://lizongying.github.io/tricode/)
+[體驗一下](https://lizongying.github.io/tricode/)
 
-![](screenshots/img.png?width=300)
-![](screenshots/img_1.png?width=300)
+![](screenshots/img.png?raw=true&width=300)
+![](screenshots/img_1.png?raw=true&width=300)
 
 ## 讚賞
 
