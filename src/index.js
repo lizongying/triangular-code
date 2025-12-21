@@ -1,8 +1,8 @@
 /**
- * https://github.com/lizongying/triangular-code
+ * https://github.com/lizongying/tricode
  */
 import {Parser} from './parser.js'
-import {bilateralFilterGrayscale, getImageDataFromCanvas, rgbToGrayscale} from './utils/imageData.js'
+import {getImageDataFromCanvas} from './utils/imageData.js'
 
 const preview = document.getElementById('preview')
 const input = document.getElementById('fileInput')
@@ -22,6 +22,7 @@ input.addEventListener('change', async (e) => {
     preview.src = img.src
     preview.width = img.width
     preview.height = img.height
+    preview.style.display = ''
 
     canvas.width = img.width
     canvas.height = img.height
@@ -30,25 +31,18 @@ input.addEventListener('change', async (e) => {
 
     const imgData = getImageDataFromCanvas(ctx)
 
-    const grayData = rgbToGrayscale(imgData.data, img.width, img.height)
-
-    let blurredGray = bilateralFilterGrayscale({
-        data: grayData,
-        width: img.width,
-        height: img.height,
-    }, 5, 30, 15)
+    const parser = new Parser(imgData.data, img.width, img.height)
+    let res = parser.parse()
 
     const outputImageData = ctx.createImageData(img.width, img.height)
-    for (let i = 0; i < blurredGray.length; i++) {
-        outputImageData.data[i * 4] = blurredGray[i]
-        outputImageData.data[i * 4 + 1] = blurredGray[i]
-        outputImageData.data[i * 4 + 2] = blurredGray[i]
+    for (let i = 0; i < parser.grayData.length; i++) {
+        const v = parser.grayData[i]
+        outputImageData.data[i * 4] = v
+        outputImageData.data[i * 4 + 1] = v
+        outputImageData.data[i * 4 + 2] = v
         outputImageData.data[i * 4 + 3] = 255
     }
     ctx.putImageData(outputImageData, 0, 0)
-
-    const parser = new Parser(grayData, imgData)
-    let res = parser.parse()
 
     if (res === null) {
         return

@@ -1,7 +1,7 @@
 /**
- * https://github.com/lizongying/triangular-code
+ * https://github.com/lizongying/tricode
  */
-class Tricode {
+export class Tricode {
     constructor(container, text = '', bits = 3, size = 200) {
         this.container = container;
         this.scale = Math.sin(this.degreesToRadians(60));
@@ -104,7 +104,6 @@ class Tricode {
 
                 const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
-                    console.log(999999, bitString.slice(i, i + 3))
                     res.push(parseInt(bitString.slice(i, i + 3), 2))
                 }
 

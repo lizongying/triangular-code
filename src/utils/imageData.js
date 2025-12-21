@@ -1,5 +1,5 @@
 /**
- * https://github.com/lizongying/triangular-code
+ * https://github.com/lizongying/tricode
  */
 // img: Jimp image
 export function getImageDataFromJimp(img) {
@@ -22,11 +22,11 @@ export function getImageDataFromCanvas(ctx) {
 }
 
 /**
- * 将灰度图像数据转换为多色分类矩阵
+ * 将灰度图像数据转换为矩阵
  * @param {Uint8Array} grayData - 灰度图像数据（长度=width*height）
  * @param {number} width - 图像宽度
  * @param {number} height - 图像高度
- * @returns {Array<Array<number>>} 二维矩阵（分类值，从 0 开始）
+ * @returns {Array<Array<number>>} 二维矩阵
  */
 export function grayDataToMatrix(grayData, width, height) {
     const matrix = []
@@ -43,8 +43,8 @@ export function grayDataToMatrix(grayData, width, height) {
 
 /**
  *
- * @param {Array<Array<number>>} matrix - 二维矩阵（分类值，从 0 开始）
- * @returns {Array<Array<number>>} 二维矩阵（分类值，从 0 开始）
+ * @param {Array<Array<number>>} matrix - 二维矩阵
+ * @returns {Array<Array<number>>} 二维矩阵
  */
 export function toBinaryMatrix(matrix) {
     return matrix.map(row => row.map(v => v < 128 ? 1 : 0))
@@ -58,15 +58,14 @@ export function toBinaryMatrix(matrix) {
  * @returns {Uint8Array} 灰度图像数据（单通道）
  */
 export function rgbToGrayscale(rgbData, width, height) {
-    const grayData = new Uint8Array(width * height);
+    const grayData = new Uint8Array(width * height)
     for (let i = 0; i < rgbData.length; i += 4) {
-        // 标准灰度公式：0.299*R + 0.587*G + 0.114*B
-        const r = rgbData[i];
-        const g = rgbData[i + 1];
-        const b = rgbData[i + 2];
-        grayData[i / 4] = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+        const r = rgbData[i]
+        const g = rgbData[i + 1]
+        const b = rgbData[i + 2]
+        grayData[i / 4] = Math.round(0.299 * r + 0.587 * g + 0.114 * b)
     }
-    return grayData;
+    return grayData
 }
 
 //
@@ -171,9 +170,11 @@ export function detectCorners(contour) {
         }
     }
 
-    if (corners.length < 3) {
+    if (corners.length < 1) {
         return null
     }
+
+    // console.log(22222, corners)
 
 
 // 1. 初始化 DBSCAN
@@ -490,14 +491,13 @@ export function bilateralFilterGrayscale(imageData, radius, sigmaColor, sigmaSpa
     return output
 }
 
-
-
 const m2 = {
     0: [0, 0],
     1: [0, 1],
     2: [1, 0],
     3: [1, 1],
 }
+
 const m3 = {
     0: [0, 0, 0],
     1: [0, 0, 1],

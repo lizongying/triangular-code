@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>掃描</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+
+        #canvasContainer {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #tip {
+            position: fixed;
+            top: 3rem;
+            width: 100%;
+            color: #fff;
+            text-align: center;
+            user-select: none;
+        }
+
+        #result {
+            height: 5rem;
+            overflow: scroll;
+            position: fixed;
+            bottom: 5rem;
+            left: 1rem;
+            color: #fff;
+            width: calc(100% - 2rem);
+            overflow-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+
+<div style="display:flex;flex-direction: column">
+    <video id="webcam" style="display:none;" autoplay muted playsInline></video>
+    <div id="canvasContainer">
+        <canvas id="canvas"></canvas>
+        <div id="tip">請將三角碼置於掃描框</div>
+        <div id="result"></div>
+    </div>
+</div>
+</body>
+<script type="module" src="src/scan.js"></script>
+</html>

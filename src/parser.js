@@ -1,30 +1,28 @@
 /**
- * https://github.com/lizongying/triangular-code
+ * https://github.com/lizongying/tricode
  */
 import {
+    bilateralFilterGrayscale,
     calculateLength,
     checkCorners,
     detectCorners,
     findConnected, grayDataToMatrix,
-    isTriangleShape, packBitsToBytes, toBinaryMatrix,
+    isTriangleShape, packBitsToBytes, rgbToGrayscale, toBinaryMatrix,
     traceContourFromRegion
 } from './utils/imageData.js'
 import {decode} from './decode.js'
 import {RGB_PALETTE_4COLORS, RGB_PALETTE_8COLORS, table, table3} from './utils/constants.js'
 
 export class Parser {
-    constructor(grayData, imgData) {
-        this.binaryMatrix = toBinaryMatrix(grayDataToMatrix(grayData, imgData.width, imgData.height))
-
-        this.h = imgData.width
-        this.w = imgData.height
-
+    constructor(imgData, width, height) {
         this.imgData = imgData
+        this.w = width
+        this.h = height
 
         this.bits = 3
     }
 
-    getModuleValueByMedianFilter(image, x, y, moduleSize = 5) {
+    getModuleValueByMedianFilter(x, y, moduleSize = 5) {
         const pixels = []
         const half = Math.floor(moduleSize / 2)
 
@@ -35,19 +33,19 @@ export class Parser {
                 if (nx >= 0 && ny >= 0 && nx < this.w && ny < this.h) {
                     switch (this.bits) {
                         case 3: {
-                            const {r, g, b} = getPixelRGB(this.imgData, nx, ny)
+                            const {r, g, b} = getPixelRGB(this.imgData, this.w, nx, ny)
                             const res = identifyColor([r, g, b], 3)
                             pixels.push(res)
                             break
                         }
                         case 2: {
-                            const {r, g, b} = getPixelRGB(this.imgData, nx, ny)
+                            const {r, g, b} = getPixelRGB(this.imgData, this.w, nx, ny)
                             const res = identifyColor([r, g, b], 2)
                             pixels.push(res)
                             break
                         }
                         default: {
-                            pixels.push(image[ny][nx])
+                            pixels.push(this.binaryMatrix[ny][nx])
                         }
                     }
                 }
@@ -63,23 +61,44 @@ export class Parser {
     }
 
     parse() {
-        const regions = findConnected(this.binaryMatrix);
+        const width = this.w
+        const height = this.h
+
+        this.grayData = rgbToGrayscale(this.imgData, width, height)
+        // console.log('grayData', this.grayData)
+
+        this.blurredGray = bilateralFilterGrayscale({
+            data: this.grayData,
+            width: width,
+            height: height,
+        }, 5, 30, 15)
+        // console.log('blurredGray', this.blurredGray)
+
+        this.binaryMatrix = toBinaryMatrix(grayDataToMatrix(this.blurredGray, width, height))
+        // console.log('binaryMatrix', this.binaryMatrix)
+
+        const regions = findConnected(this.binaryMatrix)
+        // console.log('regions', regions)
 
         let vertices = []
 
         const contours = []
         for (const region of regions) {
-            const contour = traceContourFromRegion(this.binaryMatrix, region);
+            const contour = traceContourFromRegion(this.binaryMatrix, region)
+            // console.log('contour', contour)
 
-            if (contour.length < 20) continue;
-            const corners = detectCorners(contour);
+            if (contour.length < 20) continue
+            // console.log('contour', contour)
+
+            const corners = detectCorners(contour)
             if (corners === null) {
                 continue
             }
+            // console.log('corners', corners)
 
-            if (corners.length !== 3) continue;
+            if (corners.length !== 3) continue
 
-            if (!isTriangleShape(corners)) continue;
+            if (!isTriangleShape(corners)) continue
 
             const res = checkCorners(this.binaryMatrix, corners)
             if (res.type === 1) {
@@ -94,9 +113,9 @@ export class Parser {
         }
 
         vertices.unshift(contours.find(v => v.type === 0 && (v.side / contours[1].side < 1.2 || v.side / contours[1].side > 0.8)))
-        // console.log('vertices', vertices)
+        console.log('vertices', vertices)
 
-        let color = this.getModuleValueByMedianFilter(this.binaryMatrix, Math.round(vertices[0].center.x), Math.round(vertices[0].center.y))
+        let color = this.getModuleValueByMedianFilter(Math.round(vertices[0].center.x), Math.round(vertices[0].center.y))
 
         switch (color) {
             case 1: {
@@ -176,10 +195,11 @@ export class Parser {
 
             let m = this.localToGlobal({u: a, v: b}, basis)
 
-            bits.push(this.getModuleValueByMedianFilter(this.binaryMatrix, Math.round(m.x), Math.round(m.y), 3))
+            bits.push(this.getModuleValueByMedianFilter(Math.round(m.x), Math.round(m.y), 3))
 
             points.push({x: m.x, y: m.y})
         }
+        // console.log(points)
 
         const content = packBitsToBytes(bits, this.bits)
 
@@ -360,14 +380,14 @@ export class Parser {
     }
 }
 
-function getPixelRGB(imageData, x, y) {
-    const index = (y * imageData.width + x) * 4;
+function getPixelRGB(imageData, width, x, y) {
+    const index = (y * width + x) * 4
     return {
-        r: imageData.data[index],     // 紅色通道 (0-255)
-        g: imageData.data[index + 1], // 綠色通道 (0-255)
-        b: imageData.data[index + 2], // 藍色通道 (0-255)
-        a: imageData.data[index + 3]  // 透明度 (0-255)
-    };
+        r: imageData[index],     // 紅色通道 (0-255)
+        g: imageData[index + 1], // 綠色通道 (0-255)
+        b: imageData[index + 2], // 藍色通道 (0-255)
+        a: imageData[index + 3]  // 透明度 (0-255)
+    }
 }
 
 /**

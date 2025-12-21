@@ -1,5 +1,5 @@
 /**
- * https://github.com/lizongying/triangular-code
+ * https://github.com/lizongying/tricode
  */
 
 export const table = {
