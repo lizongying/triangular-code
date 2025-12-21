@@ -100,8 +100,6 @@ export class Tricode {
                     bitString += '0'
                 }
 
-                console.log('bitString', bitString)
-
                 const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
                     res.push(parseInt(bitString.slice(i, i + 3), 2))

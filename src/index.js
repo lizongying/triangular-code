@@ -1,73 +1,74 @@
-/**
- * https://github.com/lizongying/tricode
- */
-import {Parser} from './parser.js'
-import {getImageDataFromCanvas} from './utils/imageData.js'
+import {Tricode} from './tricode.js'
 
-const preview = document.getElementById('preview')
-const input = document.getElementById('fileInput')
-const result = document.getElementById('result')
-const resultString = document.getElementById('result-string')
-const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d', {willReadFrequently: true})
+window.onload = () => {
+    const svg = document.querySelector('#svg');
+    const input = document.querySelector('#input');
+    const slider = document.querySelector('#slider');
+    const bits = document.querySelector('[name="bits"][checked]');
+    console.log('bits', bits.value)
 
-input.addEventListener('change', async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+    let size = 200;
+    slider.value = size;
+    let instance = new Tricode(svg, input.value, Number(bits.value), size);
 
-    const img = new Image()
-    img.src = URL.createObjectURL(file)
-    await img.decode()
+    input.addEventListener('input', () => {
+        instance.updateText(input.value);
+    });
 
-    preview.src = img.src
-    preview.width = img.width
-    preview.height = img.height
-    preview.style.display = ''
+    slider.addEventListener('input', () => {
+        instance.updateSize(Number(slider.value))
+    });
 
-    canvas.width = img.width
-    canvas.height = img.height
-    ctx.drawImage(img, 0, 0)
-    canvas.style.display = ''
-
-    const imgData = getImageDataFromCanvas(ctx)
-
-    const parser = new Parser(imgData.data, img.width, img.height)
-    let res = parser.parse()
-
-    const outputImageData = ctx.createImageData(img.width, img.height)
-    for (let i = 0; i < parser.grayData.length; i++) {
-        const v = parser.grayData[i]
-        outputImageData.data[i * 4] = v
-        outputImageData.data[i * 4 + 1] = v
-        outputImageData.data[i * 4 + 2] = v
-        outputImageData.data[i * 4 + 3] = 255
-    }
-    ctx.putImageData(outputImageData, 0, 0)
-
-    if (res === null) {
-        return
+    let hide = false
+    const container = document.querySelector('.container');
+    const aside = document.querySelector('.aside');
+    const action = document.querySelector('#action');
+    action.onclick = () => {
+        if (!hide) {
+            input.style.display = 'none';
+            container.style.width = '100%';
+            aside.style.display = 'none';
+            action.innerText = '顯';
+        } else {
+            input.style.display = 'flex';
+            container.style.width = 'calc(100% - 5em)';
+            aside.style.display = 'grid';
+            action.innerText = '隱';
+        }
+        hide = !hide
     }
 
-    console.log('res', res)
-
-    res.vertices.slice(0, 2).forEach(v => drawPoint(v.center.x, v.center.y, 'green', 3))
-
-    drawPoints(res.points, 'yellow', 3)
-
-    drawPoints([res.A1, res.B1, res.C1], 'red', 3)
-    drawPoints([res.A2, res.B2, res.C2], 'red', 3)
-
-    result.textContent = res.bits.map(v => v.toString()).join(',')
-    resultString.textContent = res.content
-})
-
-function drawPoints(points, color = 'blue', size = 2) {
-    for (const p of points) {
-        drawPoint(p.x, p.y, color, size)
+    document.querySelector('#export').onclick = (e) => {
+        e.preventDefault();
+        const svg = container.querySelector('svg');
+        const serializer = new XMLSerializer();
+        const svgString = serializer.serializeToString(svg);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        const svgBlob = new Blob([svgString], {type: 'image/svg+xml;charset=utf-8'});
+        const url = URL.createObjectURL(svgBlob);
+        img.onload = () => {
+            canvas.width = svg.width.baseVal.value;
+            canvas.height = svg.height.baseVal.value;
+            ctx.drawImage(img, 0, 0);
+            const link = document.createElement('a');
+            link.download = 'tc.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            URL.revokeObjectURL(url);
+        };
+        img.src = url;
     }
-}
 
-function drawPoint(x, y, color = 'red', size = 3) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x - size / 2, y - size / 2, size, size)
+    // document.querySelector('button').onclick = _ => {
+    //     input.value = Number(input.value) + 1
+    //     instance.updateText(input.value);
+    // }
+
+    document.querySelectorAll('input[name="bits"]').forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            instance.updateColor(Number(Number(event.target.value)))
+        });
+    });
 }

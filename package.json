@@ -25,13 +25,14 @@
   },
   "homepage": "https://lizongying.github.io/tricode/",
   "devDependencies": {
-    "vite": "npm:rolldown-vite@7.2.5",
     "@eslint/js": "^9.39.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
     "globals": "^16.5.0",
-    "terser": "^5.44.1"
+    "terser": "^5.44.1",
+    "vite": "npm:rolldown-vite@7.2.5",
+    "vite-plugin-html": "^3.2.2"
   },
   "dependencies": {
     "jimp": "^1.6.0"
