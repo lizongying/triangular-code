@@ -13,10 +13,10 @@ self.onmessage = (e) => {
 
         console.log('res', res)
 
-        // self.postMessage({
-        //     success: true,
-        //     text: 'res.content',
-        // })
+        self.postMessage({
+            success: true,
+            text: 'res.content',
+        })
 
         if (res === null) {
             self.postMessage({

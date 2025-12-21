@@ -17,7 +17,7 @@ window.onload = () => {
     let detectCount = 0
     let isScanned = false
 
-    const DETECT_INTERVAL = 300
+    const DETECT_INTERVAL = 60
 
     let worker = null
 
@@ -53,6 +53,21 @@ window.onload = () => {
         return {x: renderX, y: renderY, w: renderW, h: renderH}
     }
 
+    const playBeep = ()=> {
+        const audioContext = new (window.AudioContext)()
+        const oscillator = audioContext.createOscillator()
+        const gainNode = audioContext.createGain()
+
+        oscillator.connect(gainNode)
+        gainNode.connect(audioContext.destination)
+
+        oscillator.frequency.setValueAtTime(1200, audioContext.currentTime)
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
+
+        oscillator.start()
+        oscillator.stop(audioContext.currentTime + 0.2)
+    }
+
     const initWorker = () => {
         worker = new Worker(new URL('./detector.worker.js', import.meta.url), {type: 'module'})
 
@@ -63,6 +78,7 @@ window.onload = () => {
                 // isScanned = true
                 // alert(`掃碼成功：${res.text}`)
                 result.textContent = res.text
+                playBeep()
                 // stopCamera()
                 // terminateWorker()
             }
