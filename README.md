@@ -7,8 +7,8 @@
 
 [體驗一下](https://lizongying.github.io/tricode/)
 
-![](screenshots/img.png)
-![](screenshots/img_1.png)
+![](screenshots/img.jpg)
+![](screenshots/img_1.jpg)
 
 ## 讚賞
 
