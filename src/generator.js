@@ -26,7 +26,8 @@ export class Generator {
         } else {
             svg = document.createElementNS(this._svgNamespace, 'svg')
             svg.setAttribute('transform', `scale(1,${this.scale})`)
-            container.appendChild(svg)
+            const shadowRoot = container.attachShadow({ mode: 'open' });
+            shadowRoot.appendChild(svg)
         }
         svg.setAttribute('width', `${size}`)
         svg.setAttribute('height', `${size}`)
