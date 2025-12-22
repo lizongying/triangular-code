@@ -10,9 +10,17 @@ export default defineConfig({
             input: {
                 index: resolve(__dirname, './index.html'),
                 scan: resolve(__dirname, './scan.html'),
+                main: resolve(__dirname, './src/main.js'),
+            },
+            output: {
+                entryFileNames: (chunkInfo) => {
+                    return chunkInfo.name === 'main'
+                        ? 'assets/main.js'
+                        : 'assets/[name]-[hash].js'
+                },
             },
         },
-        outDir: 'docs',
+        outDir: 'dist',
     },
     plugins: [
         createHtmlPlugin({

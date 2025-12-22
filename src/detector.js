@@ -1,10 +1,10 @@
 /**
  * https://github.com/lizongying/tricode
  */
-import {Parser} from './parser.js'
+import { Parser } from './parser.js'
 
 self.onmessage = (e) => {
-    const {imageData, width, height} = e.data
+    const { imageData, width, height } = e.data
 
     try {
         const data = new Uint8ClampedArray(imageData)
@@ -21,7 +21,7 @@ self.onmessage = (e) => {
         if (res === null) {
             self.postMessage({
                 success: false,
-                text: ''
+                text: '',
             })
             return
         }
@@ -34,7 +34,7 @@ self.onmessage = (e) => {
         self.postMessage({
             success: false,
             text: '',
-            error: err.message
+            error: err.message,
         })
     }
 }

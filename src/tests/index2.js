@@ -1,15 +1,15 @@
 /**
  * https://github.com/lizongying/tricode
  */
-import {Parser} from './parser.js'
-import {getImageDataFromCanvas} from './utils/imageData.js'
+import { Parser } from '../parser.js'
+import { getImageDataFromCanvas } from '../utils/imageData.js'
 
 const preview = document.getElementById('preview')
 const input = document.getElementById('fileInput')
 const result = document.getElementById('result')
 const resultString = document.getElementById('result-string')
 const canvas = document.getElementById('canvas')
-const ctx = canvas.getContext('2d', {willReadFrequently: true})
+const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
 input.addEventListener('change', async (e) => {
     const file = e.target.files[0]
@@ -50,14 +50,16 @@ input.addEventListener('change', async (e) => {
 
     console.log('res', res)
 
-    res.vertices.slice(0, 2).forEach(v => drawPoint(v.center.x, v.center.y, 'green', 3))
+    res.vertices
+        .slice(0, 2)
+        .forEach((v) => drawPoint(v.center.x, v.center.y, 'green', 3))
 
     drawPoints(res.points, 'yellow', 3)
 
     drawPoints([res.A1, res.B1, res.C1], 'red', 3)
     drawPoints([res.A2, res.B2, res.C2], 'red', 3)
 
-    result.textContent = res.bits.map(v => v.toString()).join(',')
+    result.textContent = res.bits.map((v) => v.toString()).join(',')
     resultString.textContent = res.content
 })
 
@@ -68,6 +70,6 @@ function drawPoints(points, color = 'blue', size = 2) {
 }
 
 function drawPoint(x, y, color = 'red', size = 3) {
-    ctx.fillStyle = color;
+    ctx.fillStyle = color
     ctx.fillRect(x - size / 2, y - size / 2, size, size)
 }

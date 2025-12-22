@@ -3,11 +3,14 @@
   "version": "0.1.0",
   "description": "三角碼",
   "type": "module",
-  "main": "docs/tricode.min.js",
+  "main": "dist/assets/main.js",
   "scripts": {
+    "check": "npx eslint \"src/**/*.js\"",
+    "fix": "npx prettier \"src/**/*.js\" --write",
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepublishOnly": "pnpm run build"
   },
   "repository": {
     "type": "git",

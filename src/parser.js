@@ -6,12 +6,21 @@ import {
     calculateLength,
     checkCorners,
     detectCorners,
-    findConnected, grayDataToMatrix,
-    isTriangleShape, packBitsToBytes, rgbToGrayscale, toBinaryMatrix,
-    traceContourFromRegion
+    findConnected,
+    grayDataToMatrix,
+    isTriangleShape,
+    packBitsToBytes,
+    rgbToGrayscale,
+    toBinaryMatrix,
+    traceContourFromRegion,
 } from './utils/imageData.js'
-import {decode} from './decode.js'
-import {RGB_PALETTE_4COLORS, RGB_PALETTE_8COLORS, table, table3} from './utils/constants.js'
+import { decode } from './decode.js'
+import {
+    RGB_PALETTE_4COLORS,
+    RGB_PALETTE_8COLORS,
+    table,
+    table3,
+} from './utils/constants.js'
 
 export class Parser {
     constructor(imgData, width, height) {
@@ -28,18 +37,28 @@ export class Parser {
 
         for (let dy = -half; dy <= half; dy++) {
             for (let dx = -half; dx <= half; dx++) {
-                const nx = x + dx;
-                const ny = y + dy;
+                const nx = x + dx
+                const ny = y + dy
                 if (nx >= 0 && ny >= 0 && nx < this.w && ny < this.h) {
                     switch (this.bits) {
                         case 3: {
-                            const {r, g, b} = getPixelRGB(this.imgData, this.w, nx, ny)
+                            const { r, g, b } = getPixelRGB(
+                                this.imgData,
+                                this.w,
+                                nx,
+                                ny,
+                            )
                             const res = identifyColor([r, g, b], 3)
                             pixels.push(res)
                             break
                         }
                         case 2: {
-                            const {r, g, b} = getPixelRGB(this.imgData, this.w, nx, ny)
+                            const { r, g, b } = getPixelRGB(
+                                this.imgData,
+                                this.w,
+                                nx,
+                                ny,
+                            )
                             const res = identifyColor([r, g, b], 2)
                             pixels.push(res)
                             break
@@ -52,7 +71,7 @@ export class Parser {
             }
         }
 
-        pixels.sort((a, b) => a - b);
+        pixels.sort((a, b) => a - b)
         return pixels[Math.floor(pixels.length / 2)]
     }
 
@@ -67,14 +86,21 @@ export class Parser {
         this.grayData = rgbToGrayscale(this.imgData, width, height)
         // console.log('grayData', this.grayData)
 
-        this.blurredGray = bilateralFilterGrayscale({
-            data: this.grayData,
-            width: width,
-            height: height,
-        }, 5, 30, 15)
+        this.blurredGray = bilateralFilterGrayscale(
+            {
+                data: this.grayData,
+                width: width,
+                height: height,
+            },
+            5,
+            30,
+            15,
+        )
         // console.log('blurredGray', this.blurredGray)
 
-        this.binaryMatrix = toBinaryMatrix(grayDataToMatrix(this.blurredGray, width, height))
+        this.binaryMatrix = toBinaryMatrix(
+            grayDataToMatrix(this.blurredGray, width, height),
+        )
         // console.log('binaryMatrix', this.binaryMatrix)
 
         const regions = findConnected(this.binaryMatrix)
@@ -112,10 +138,20 @@ export class Parser {
             return null
         }
 
-        vertices.unshift(contours.find(v => v.type === 0 && (v.side / contours[1].side < 1.2 || v.side / contours[1].side > 0.8)))
+        vertices.unshift(
+            contours.find(
+                (v) =>
+                    v.type === 0 &&
+                    (v.side / contours[1].side < 1.2 ||
+                        v.side / contours[1].side > 0.8),
+            ),
+        )
         console.log('vertices', vertices)
 
-        let color = this.getModuleValueByMedianFilter(Math.round(vertices[0].center.x), Math.round(vertices[0].center.y))
+        let color = this.getModuleValueByMedianFilter(
+            Math.round(vertices[0].center.x),
+            Math.round(vertices[0].center.y),
+        )
 
         switch (color) {
             case 1: {
@@ -133,27 +169,46 @@ export class Parser {
 
         console.log('bits', this.bits)
 
-        const {A: A1, B: B1, C: C1} = this.classifyTrianglePoints(vertices[1].corners, vertices[0].center)
+        const {
+            A: A1,
+            B: B1,
+            C: C1,
+        } = this.classifyTrianglePoints(vertices[1].corners, vertices[0].center)
 
         const basis0 = this.buildLocalBasis(A1, B1, C1)
         // console.log('basis0', basis0)
 
-        const {A: A2, B: B2, C: C2} = this.classifyTrianglePoints(vertices[0].corners, vertices[1].center)
+        const {
+            A: A2,
+            B: B2,
+            C: C2,
+        } = this.classifyTrianglePoints(vertices[0].corners, vertices[1].center)
         const basis1 = this.buildLocalBasis(A2, C2, B2)
         // console.log('basis1', basis1)
 
         const origin = basis0.origin
-        const ex = {x: (basis0.ex.x + basis1.ex.x) / 2, y: (basis0.ex.y + basis1.ex.y) / 2}
-        const ey = {x: (basis0.ey.x + basis1.ey.x) / 2, y: (basis0.ey.y + basis1.ey.y) / 2}
+        const ex = {
+            x: (basis0.ex.x + basis1.ex.x) / 2,
+            y: (basis0.ex.y + basis1.ex.y) / 2,
+        }
+        const ey = {
+            x: (basis0.ey.x + basis1.ey.x) / 2,
+            y: (basis0.ey.y + basis1.ey.y) / 2,
+        }
         const scaleX = (basis0.scaleX + basis1.scaleX) / 2
         const scaleY = (basis0.scaleY + basis1.scaleY) / 2
-        const basis = {origin, ex, ey, scaleX, scaleY};
+        const basis = { origin, ex, ey, scaleX, scaleY }
         // console.log('basis', basis)
 
         let x1 = (vertices[0].side + vertices[1].side) / 8
         let x = calculateLength(vertices[1].center, vertices[0].center) / x1
 
-        console.log('this.roundToNearest5(x)', calculateLength(vertices[1].center, vertices[0].center), x1, this.roundToNearest5(x))
+        console.log(
+            'this.roundToNearest5(x)',
+            calculateLength(vertices[1].center, vertices[0].center),
+            x1,
+            this.roundToNearest5(x),
+        )
         const version = table[this.roundToNearest5(x)] ?? 93
         console.log('version:', version)
 
@@ -179,9 +234,17 @@ export class Parser {
         //     // points.push({x: a, y: b})
         // }
 
-        let y0 = Math.abs(this.globalToLocal(vertices[1].center, basis).v - this.globalToLocal(vertices[0].center, basis).v) / len
+        let y0 =
+            Math.abs(
+                this.globalToLocal(vertices[1].center, basis).v -
+                    this.globalToLocal(vertices[0].center, basis).v,
+            ) / len
         // console.log('y0', y0)
-        let x0 = Math.abs(this.globalToLocal(vertices[1].center, basis).u - this.globalToLocal(vertices[0].center, basis).u) / len
+        let x0 =
+            Math.abs(
+                this.globalToLocal(vertices[1].center, basis).u -
+                    this.globalToLocal(vertices[0].center, basis).u,
+            ) / len
         // console.log('x0', x0)
 
         let points = []
@@ -193,11 +256,17 @@ export class Parser {
                 b = b + y0 / 3
             }
 
-            let m = this.localToGlobal({u: a, v: b}, basis)
+            let m = this.localToGlobal({ u: a, v: b }, basis)
 
-            bits.push(this.getModuleValueByMedianFilter(Math.round(m.x), Math.round(m.y), 3))
+            bits.push(
+                this.getModuleValueByMedianFilter(
+                    Math.round(m.x),
+                    Math.round(m.y),
+                    3,
+                ),
+            )
 
-            points.push({x: m.x, y: m.y})
+            points.push({ x: m.x, y: m.y })
         }
         // console.log(points)
 
@@ -208,11 +277,15 @@ export class Parser {
             contours,
             points,
             vertices,
-            A1, B1, C1,
-            A2, B2, C2,
+            A1,
+            B1,
+            C1,
+            A2,
+            B2,
+            C2,
             bits,
-            content
-        };
+            content,
+        }
     }
 
     classifyTrianglePoints(corners, center) {
@@ -226,16 +299,16 @@ export class Parser {
 
             if (d < minD) {
                 minD = d
-                minP = p   // C
+                minP = p // C
             }
             if (d > maxD) {
                 maxD = d
-                maxP = p   // B
+                maxP = p // B
             }
         }
 
         // A = 剩下那个
-        const A = corners.find(p => p !== minP && p !== maxP)
+        const A = corners.find((p) => p !== minP && p !== maxP)
         const B = maxP
         const C = minP
 
@@ -243,23 +316,23 @@ export class Parser {
             throw new Error('三角点分类失败')
         }
 
-        return {A, B, C}
+        return { A, B, C }
     }
 
     safeHypot(a, b) {
-        a = Math.abs(a);
-        b = Math.abs(b);
-        const max = Math.max(a, b);
-        const min = Math.min(a, b);
-        if (max < 1e-12) return 1e-12;
-        const ratio = min / max;
-        return max * Math.sqrt(1 + ratio * ratio);
+        a = Math.abs(a)
+        b = Math.abs(b)
+        const max = Math.max(a, b)
+        const min = Math.min(a, b)
+        if (max < 1e-12) return 1e-12
+        const ratio = min / max
+        return max * Math.sqrt(1 + ratio * ratio)
     }
 
     ensureUnitVector(vec) {
-        const len = this.safeHypot(vec.x, vec.y);
-        if (Math.abs(len - 1) > 1e-6) return {x: vec.x / len, y: vec.y / len};
-        return vec;
+        const len = this.safeHypot(vec.x, vec.y)
+        if (Math.abs(len - 1) > 1e-6) return { x: vec.x / len, y: vec.y / len }
+        return vec
     }
 
     /**
@@ -267,13 +340,13 @@ export class Parser {
      * 原理：ey = ey - (ex · ey) * ex → 移除 ey 在 ex 方向的投影，保证正交
      */
     orthogonalize(ex, ey) {
-        const dot = ex.x * ey.x + ex.y * ey.y; // ex 和 ey 的点积（理想应为0，实际有误差）
+        const dot = ex.x * ey.x + ex.y * ey.y // ex 和 ey 的点积（理想应为0，实际有误差）
         // 移除 ey 在 ex 方向的投影，确保正交
         const eyOrth = {
             x: ey.x - dot * ex.x,
-            y: ey.y - dot * ex.y
-        };
-        return this.ensureUnitVector(eyOrth); // 重新归一化，保证是单位向量
+            y: ey.y - dot * ex.y,
+        }
+        return this.ensureUnitVector(eyOrth) // 重新归一化，保证是单位向量
     }
 
     /**
@@ -293,27 +366,27 @@ export class Parser {
         // 1. 计算AB中点M（局部坐标系原点）
         const origin = {
             x: (A.x + B.x) / 2,
-            y: (A.y + B.y) / 2
-        };
+            y: (A.y + B.y) / 2,
+        }
 
         // 2. 定义x轴：沿AB方向（跟随AB倾斜）
-        const ABx = B.x - A.x;
-        const ABy = B.y - A.y;
-        const scaleX = this.safeHypot(ABx, ABy); // x轴比例基准（AB的真实长度）
-        if (scaleX < 1e-6) throw new Error("顶点A和B不能重合");
-        const ex = this.ensureUnitVector({x: ABx / scaleX, y: ABy / scaleX}); // AB单位向量（x轴方向）
+        const ABx = B.x - A.x
+        const ABy = B.y - A.y
+        const scaleX = this.safeHypot(ABx, ABy) // x轴比例基准（AB的真实长度）
+        if (scaleX < 1e-6) throw new Error('顶点A和B不能重合')
+        const ex = this.ensureUnitVector({ x: ABx / scaleX, y: ABy / scaleX }) // AB单位向量（x轴方向）
 
         // 3. 定义y轴：沿M→C方向（核心：不垂直AB，仅指向C）
-        const MCx = C.x - origin.x;
-        const MCy = C.y - origin.y;
-        const scaleY = this.safeHypot(MCx, MCy); // y轴比例基准（M到C的真实距离）
-        if (scaleY < 1e-6) throw new Error("C点不能与AB中点重合");
+        const MCx = C.x - origin.x
+        const MCy = C.y - origin.y
+        const scaleY = this.safeHypot(MCx, MCy) // y轴比例基准（M到C的真实距离）
+        if (scaleY < 1e-6) throw new Error('C点不能与AB中点重合')
         // const ey = {x: MCx / scaleY, y: MCy / scaleY}; // M→C单位向量（y轴方向）
 
-        let ey = {x: MCx / scaleY, y: MCy / scaleY}; // 初始y轴
-        ey = this.orthogonalize(ex, ey); // 关键：正交化修正，确保与ex垂直
+        let ey = { x: MCx / scaleY, y: MCy / scaleY } // 初始y轴
+        ey = this.orthogonalize(ex, ey) // 关键：正交化修正，确保与ex垂直
 
-        return {origin, ex, ey, scaleX, scaleY};
+        return { origin, ex, ey, scaleX, scaleY }
     }
 
     /**
@@ -328,19 +401,19 @@ export class Parser {
      */
     globalToLocal(P, basis) {
         // 计算P相对于中点M的向量
-        const dx = P.x - basis.origin.x;
-        const dy = P.y - basis.origin.y;
+        const dx = P.x - basis.origin.x
+        const dy = P.y - basis.origin.y
 
         // 分解到x轴（AB方向）和y轴（M→C方向）
-        const u = this.preciseAdd(dx * basis.ex.x, dy * basis.ex.y);
-        const v = this.preciseAdd(dx * basis.ey.x, dy * basis.ey.y);
+        const u = this.preciseAdd(dx * basis.ex.x, dy * basis.ex.y)
+        const v = this.preciseAdd(dx * basis.ey.x, dy * basis.ey.y)
 
         return {
             u,
             v,
             uNorm: u / basis.scaleX, // 归一化（比例计算用）
-            vNorm: v / basis.scaleY  // 归一化（比例计算用）
-        };
+            vNorm: v / basis.scaleY, // 归一化（比例计算用）
+        }
     }
 
     /**
@@ -351,31 +424,31 @@ export class Parser {
      */
     localToGlobal(localP, basis) {
         // 支持原始坐标（u, v）或归一化坐标（uNorm, vNorm）
-        const u = localP.u ?? (localP.uNorm * basis.scaleX);
-        const v = localP.v ?? (localP.vNorm * basis.scaleY);
+        const u = localP.u ?? localP.uNorm * basis.scaleX
+        const v = localP.v ?? localP.vNorm * basis.scaleY
 
         // 局部向量 = u*ex（沿AB倾斜） + v*ey（沿M→C）
-        const vecX = this.preciseAdd(u * basis.ex.x, v * basis.ey.x);
-        const vecY = this.preciseAdd(u * basis.ex.y, v * basis.ey.y);
+        const vecX = this.preciseAdd(u * basis.ex.x, v * basis.ey.x)
+        const vecY = this.preciseAdd(u * basis.ex.y, v * basis.ey.y)
 
         // 加上中点M的全局坐标，得到最终位置
         return {
             x: this.preciseAdd(basis.origin.x, vecX),
-            y: this.preciseAdd(basis.origin.y, vecY)
-        };
+            y: this.preciseAdd(basis.origin.y, vecY),
+        }
     }
 
     preciseAdd(a, b) {
         // 比较两个数的绝对值，确保小数在前、大数在后
-        const absA = Math.abs(a);
-        const absB = Math.abs(b);
+        const absA = Math.abs(a)
+        const absB = Math.abs(b)
 
         if (absA < absB) {
             // a是小数，b是大数 → 小数 + 大数
-            return a + b;
+            return a + b
         } else {
             // b是小数，a是大数 → 小数 + 大数
-            return b + a;
+            return b + a
         }
     }
 }
@@ -383,10 +456,10 @@ export class Parser {
 function getPixelRGB(imageData, width, x, y) {
     const index = (y * width + x) * 4
     return {
-        r: imageData[index],     // 紅色通道 (0-255)
+        r: imageData[index], // 紅色通道 (0-255)
         g: imageData[index + 1], // 綠色通道 (0-255)
         b: imageData[index + 2], // 藍色通道 (0-255)
-        a: imageData[index + 3]  // 透明度 (0-255)
+        a: imageData[index + 3], // 透明度 (0-255)
     }
 }
 
@@ -397,14 +470,16 @@ function getPixelRGB(imageData, width, x, y) {
  * @returns {number} 兩個顏色之間的距離平方（數值越小，顏色越接近）。
  */
 function rgbDistance(rgb1, rgb2) {
-    return Math.pow(rgb1[0] - rgb2[0], 2) +
+    return (
+        Math.pow(rgb1[0] - rgb2[0], 2) +
         Math.pow(rgb1[1] - rgb2[1], 2) +
         Math.pow(rgb1[2] - rgb2[2], 2)
+    )
 }
 
 function identifyColor(pixelRgb, bits) {
-    let minDistance = Infinity;
-    let matchedColor = null;
+    let minDistance = Infinity
+    let matchedColor = null
 
     let colors = RGB_PALETTE_8COLORS
     switch (bits) {
@@ -415,12 +490,12 @@ function identifyColor(pixelRgb, bits) {
     }
 
     for (const color of colors) {
-        const distance = rgbDistance(pixelRgb, color.rgb);
+        const distance = rgbDistance(pixelRgb, color.rgb)
         if (distance < minDistance) {
-            minDistance = distance;
-            matchedColor = color.index;
+            minDistance = distance
+            matchedColor = color.index
         }
     }
 
-    return matchedColor;
+    return matchedColor
 }

@@ -1,77 +1,76 @@
 /**
  * https://github.com/lizongying/tricode
  */
-export class Tricode {
+export class Generator {
     constructor(container, text = '', bits = 3, size = 200) {
-        this.container = container;
-        this.scale = Math.sin(this.degreesToRadians(60));
+        this.container = container
+        this.scale = Math.sin(this.degreesToRadians(60))
 
-        this._svgNamespace = 'http://www.w3.org/2000/svg';
+        this._svgNamespace = 'http://www.w3.org/2000/svg'
 
         this.bits = bits
 
-        this.text = text;
+        this.text = text
 
-        this.updateSize(size);
+        this.updateSize(size)
     }
 
-
     updateSize(size) {
-        this.size = size;
-        const container = this.container;
-        let svg = container.querySelector('svg');
+        this.size = size
+        const container = this.container
+        let svg = container.querySelector('svg')
         if (svg) {
             while (svg.firstChild) {
-                svg.removeChild(svg.firstChild);
+                svg.removeChild(svg.firstChild)
             }
         } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg');
-            svg.setAttribute('transform', `scale(1,${this.scale})`);
-            container.appendChild(svg);
+            svg = document.createElementNS(this._svgNamespace, 'svg')
+            svg.setAttribute('transform', `scale(1,${this.scale})`)
+            container.appendChild(svg)
         }
-        svg.setAttribute('width', `${size}`);
-        svg.setAttribute('height', `${size}`);
-        svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
-        this._svg = svg;
-        this.encode();
+        svg.setAttribute('width', `${size}`)
+        svg.setAttribute('height', `${size}`)
+        svg.setAttribute('viewBox', `0 0 ${size} ${size}`)
+        this._svg = svg
+        this.encode()
     }
 
     updateText(text) {
-        this.text = text;
-        const container = this.container;
-        let svg = container.querySelector('svg');
+        this.text = text
+        const container = this.container
+        let svg = container.querySelector('svg')
         if (svg) {
             while (svg.firstChild) {
-                svg.removeChild(svg.firstChild);
+                svg.removeChild(svg.firstChild)
             }
         } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg');
-            svg.setAttribute('transform', `scale(1,${this.scale})`);
-            container.appendChild(svg);
+            svg = document.createElementNS(this._svgNamespace, 'svg')
+            svg.setAttribute('transform', `scale(1,${this.scale})`)
+            container.appendChild(svg)
         }
-        this._svg = svg;
-        this.encode();
+        this._svg = svg
+        this.encode()
     }
 
     updateColor(bits) {
         this.bits = bits
-        const container = this.container;
-        let svg = container.querySelector('svg');
+        const container = this.container
+        let svg = container.querySelector('svg')
         if (svg) {
             while (svg.firstChild) {
-                svg.removeChild(svg.firstChild);
+                svg.removeChild(svg.firstChild)
             }
         } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg');
-            svg.setAttribute('transform', `scale(1,${this.scale})`);
-            container.appendChild(svg);
+            svg = document.createElementNS(this._svgNamespace, 'svg')
+            svg.setAttribute('transform', `scale(1,${this.scale})`)
+            container.appendChild(svg)
         }
-        this._svg = svg;
-        this.encode();
+        this._svg = svg
+        this.encode()
     }
 
     degreesToRadians(degrees) {
-        return degrees * (Math.PI / 180);
+        return degrees * (Math.PI / 180)
     }
 
     /**
@@ -83,9 +82,9 @@ export class Tricode {
         const encoder = new TextEncoder()
         const coreBytes = encoder.encode(str)
         // 2. 拼接1个0作为\0分隔符（仅1个，满足分隔需求）
-        let byteArray = new Uint8Array(coreBytes.length + 1);
-        byteArray.set(coreBytes); // 复制核心字节
-        byteArray[coreBytes.length] = 0; // 末尾加1个0（\0分隔符）
+        let byteArray = new Uint8Array(coreBytes.length + 1)
+        byteArray.set(coreBytes) // 复制核心字节
+        byteArray[coreBytes.length] = 0 // 末尾加1个0（\0分隔符）
 
         const sign = '01'
         const signArr = [0, 1]
@@ -122,16 +121,20 @@ export class Tricode {
             }
 
             default: {
-                return signArr.concat(Array.from(byteArray)
-                    .flatMap(byte => byte.toString(2).padStart(8, '0').split(''))
-                    .map(Number))
+                return signArr.concat(
+                    Array.from(byteArray)
+                        .flatMap((byte) =>
+                            byte.toString(2).padStart(8, '0').split(''),
+                        )
+                        .map(Number),
+                )
             }
         }
     }
 
     //
     numberToBits(str) {
-        const bitArray = numericToQrBits(str);
+        const bitArray = numericToQrBits(str)
 
         const sign = '00'
         const signArr = [0, 0]
@@ -184,10 +187,9 @@ export class Tricode {
                 colors = 4
                 break
             }
-            default : {
+            default: {
                 colors = 2
             }
-
         }
         return Math.floor(Math.random() * colors)
     }
@@ -214,12 +216,12 @@ export class Tricode {
                 colorCount = 2
                 break
             }
-            default : {
+            default: {
                 colorCount = 2
             }
         }
 
-        return Array.from({length: fillLength}, () => {
+        return Array.from({ length: fillLength }, () => {
             return Math.floor(Math.random() * colorCount)
         })
     }
@@ -235,7 +237,9 @@ export class Tricode {
         const capacity = table[version]
         if (!capacity) throw new Error(`Unsupported TC version: ${version}`)
         if (data.length > capacity) {
-            throw new Error(`Data length (${data.length}) exceeds capacity (${capacity}) for TC version ${version}`)
+            throw new Error(
+                `Data length (${data.length}) exceeds capacity (${capacity}) for TC version ${version}`,
+            )
         }
         if (data.length < capacity) {
             // return data.concat(new Array(capacity - data.length).fill(0))
@@ -257,14 +261,14 @@ export class Tricode {
 
             // Return the first version that can accommodate the data length
             if (dataLength <= capacity) {
-                return {version, capacity}
+                return { version, capacity }
             }
         }
 
         // If no version is found (data is too long for all supported versions)
         throw new Error(
             `Data length (${dataLength}) exceeds the maximum supported TC capacity. ` +
-            `Maximum supported capacity: ${Math.max(...Object.values(table))}`
+                `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
         )
     }
 
@@ -281,7 +285,7 @@ export class Tricode {
 
         console.log('data', data)
 
-        const {version, capacity} = this.getRequiredVersion(data.length);
+        const { version, capacity } = this.getRequiredVersion(data.length)
         console.log(`version: ${version}, capacity: ${capacity}`)
 
         // const a = 32
@@ -292,29 +296,23 @@ export class Tricode {
         data = this.padDataToVersion(data, version)
 
         let arr = [
-            1,
-            1, 1, 1,
-            1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1, 1, 1,
-            0, 0, 0, 0, 0, 0, 0, 0,
-        ];
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+            0,
+        ]
         if (data.length > 32) {
             arr.push(0)
         }
         arr = arr.concat(data)
 
         let arr2 = [
-            [0, 0, 0,],
-            [0, 0, 1, 0, 0,],
-            [0, 0, 1, 1, 1, 0, 0,],
-            [0, 0, 1, 1, 0, 1, 1, 0, 0,],
-            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,],
-        ];
-
-        const newArrAll = [
-            [0],
             [0, 0, 0],
+            [0, 0, 1, 0, 0],
+            [0, 0, 1, 1, 1, 0, 0],
+            [0, 0, 1, 1, 0, 1, 1, 0, 0],
+            [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
         ]
+
+        const newArrAll = [[0], [0, 0, 0]]
 
         let lastIdx = 0
         let i = 0
@@ -324,7 +322,7 @@ export class Tricode {
             newArr.push(0, 0)
 
             let newIdx = lastIdx + 2 * i + 1
-            newArr.push(...(arr.slice(lastIdx, newIdx)))
+            newArr.push(...arr.slice(lastIdx, newIdx))
 
             newArr.push(0, 0)
 
@@ -345,7 +343,7 @@ export class Tricode {
                     newArr.push(0, 0)
 
                     let newIdx = lastIdx + last
-                    newArr.push(...(arr.slice(lastIdx, newIdx)))
+                    newArr.push(...arr.slice(lastIdx, newIdx))
 
                     newArr.push(...Array(last - newArr.length + 2).fill(0))
 
@@ -365,32 +363,37 @@ export class Tricode {
         // const version1 = Math.ceil((2 * i + 17 - 13) / 10);
         // console.log('version', version1)
 
-
         //如果 2 * i + 17 不夠23/33/43/... newArrAll繼續填充下一行，保證下行比上一行多2個
         newArrAll.push(Array(2 * i + 17).fill(0))
 
-        let one = this.size / (i + 9);
+        let one = this.size / (i + 9)
 
         newArrAll.forEach((v, i) => {
-            let x = (this.size / 2) - (i * one / 2);
-            let y = i * one;
+            let x = this.size / 2 - (i * one) / 2
+            let y = i * one
 
             v.forEach((vv, ii) => {
-                let a;
-                let b;
-                let c;
+                let a
+                let b
+                let c
                 if (ii % 2 === 0) {
-                    a = [x + (ii * one / 2), y];
-                    b = [x + (ii * one / 2) - one / 2, y + one];
-                    c = [x + (ii * one / 2 + one / 2), y + one];
+                    a = [x + (ii * one) / 2, y]
+                    b = [x + (ii * one) / 2 - one / 2, y + one]
+                    c = [x + ((ii * one) / 2 + one / 2), y + one]
                 } else {
-                    a = [x + (ii * one / 2), y + one];
-                    b = [x + (ii * one / 2) - one / 2, y];
-                    c = [x + (ii * one / 2 + one / 2), y];
+                    a = [x + (ii * one) / 2, y + one]
+                    b = [x + (ii * one) / 2 - one / 2, y]
+                    c = [x + ((ii * one) / 2 + one / 2), y]
                 }
 
-                const triangle = document.createElementNS(this._svgNamespace, 'polygon')
-                triangle.setAttribute('points', `${a.join(',')} ${b.join(',')} ${c.join(',')}`)
+                const triangle = document.createElementNS(
+                    this._svgNamespace,
+                    'polygon',
+                )
+                triangle.setAttribute(
+                    'points',
+                    `${a.join(',')} ${b.join(',')} ${c.join(',')}`,
+                )
                 let colors = colors2
                 switch (this.bits) {
                     case 3: {
@@ -401,10 +404,9 @@ export class Tricode {
                         colors = colors4
                         break
                     }
-                    default : {
+                    default: {
                         colors = colors2
                     }
-
                 }
                 triangle.setAttribute('fill', argbToHex(colors[vv]))
                 this._svg.appendChild(triangle)
@@ -430,70 +432,69 @@ const table = {
 // 25*2+13=63
 
 const colors2 = [
-    0xFFFFFF, //white
+    0xffffff, //white
     0x000000, //black
 ]
 
 const colors4 = [
-    0xFFFFFF, // white
-    0x0000FF, // blue
-    0x00FF00, // green
-    0xFF0000, // red
+    0xffffff, // white
+    0x0000ff, // blue
+    0x00ff00, // green
+    0xff0000, // red
 ]
 
 const colors8 = [
-    0xFFFFFF, //white
-    0xFF0000, //red
-    0x00FF00, //green
-    0x0000FF, //blue
-    0xFFFF00, //yellow
-    0x00FFFF, //cyan
-    0xFF00FF, //magenta
+    0xffffff, //white
+    0xff0000, //red
+    0x00ff00, //green
+    0x0000ff, //blue
+    0xffff00, //yellow
+    0x00ffff, //cyan
+    0xff00ff, //magenta
     0x000000, //black
 ]
 
 const argbToHex = (argb) => {
-    const hex = (argb & 0xFFFFFF).toString(16).padStart(6, '0')
+    const hex = (argb & 0xffffff).toString(16).padStart(6, '0')
     return `#${hex.toUpperCase()}`
 }
 
 const numericToQrBits = (numStr, lengthBits = 10) => {
-    const strLength = numStr.length;
-    const lengthBinary = strLength.toString(2).padStart(lengthBits, "0");
+    const strLength = numStr.length
+    const lengthBinary = strLength.toString(2).padStart(lengthBits, '0')
 
     // 5. 處理數據位（3位一組編碼）
-    let dataBits = "";
+    let dataBits = ''
     // 拆分為每3位一組
-    const groups = [];
+    const groups = []
     for (let i = 0; i < numStr.length; i += 3) {
-        groups.push(numStr.slice(i, i + 3));
+        groups.push(numStr.slice(i, i + 3))
     }
 
     // 逐組轉換為對應位數的二進位
-    groups.forEach(group => {
-        const num = parseInt(group, 10);
-        let binary;
+    groups.forEach((group) => {
+        const num = parseInt(group, 10)
+        let binary
         switch (group.length) {
             case 3:
                 // 3位數 → 10位二進位
-                binary = num.toString(2).padStart(10, "0");
-                break;
+                binary = num.toString(2).padStart(10, '0')
+                break
             case 2:
                 // 2位數 → 7位二進位
-                binary = num.toString(2).padStart(7, "0");
-                break;
+                binary = num.toString(2).padStart(7, '0')
+                break
             case 1:
                 // 1位數 → 4位二進位
-                binary = num.toString(2).padStart(4, "0");
-                break;
+                binary = num.toString(2).padStart(4, '0')
+                break
             default:
-                throw new Error("分組異常，請檢查輸入");
+                throw new Error('分組異常，請檢查輸入')
         }
-        dataBits += binary;
-    });
-
+        dataBits += binary
+    })
 
     // 6. 組合完整的位元串（模式 + 長度 + 數據）
 
-    return lengthBinary + dataBits;
+    return lengthBinary + dataBits
 }

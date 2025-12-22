@@ -10,7 +10,7 @@ window.onload = () => {
 
     const container = document.getElementById('canvasContainer')
 
-    const ctx = canvas.getContext('2d', {willReadFrequently: true})
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
     let renderId = 0
 
@@ -38,7 +38,10 @@ window.onload = () => {
         const videoRatio = videoW / videoH
         const canvasRatio = canvasW / canvasH
 
-        let renderX = 0, renderY = 0, renderW = 0, renderH = 0
+        let renderX = 0,
+            renderY = 0,
+            renderW = 0,
+            renderH = 0
 
         if (videoRatio > canvasRatio) {
             renderH = canvasH
@@ -50,11 +53,11 @@ window.onload = () => {
             renderY = (canvasH - renderH) / 2
         }
 
-        return {x: renderX, y: renderY, w: renderW, h: renderH}
+        return { x: renderX, y: renderY, w: renderW, h: renderH }
     }
 
-    const playBeep = ()=> {
-        const audioContext = new (window.AudioContext)()
+    const playBeep = () => {
+        const audioContext = new window.AudioContext()
         const oscillator = audioContext.createOscillator()
         const gainNode = audioContext.createGain()
 
@@ -69,7 +72,9 @@ window.onload = () => {
     }
 
     const initWorker = () => {
-        worker = new Worker(new URL('./detector.worker.js', import.meta.url), {type: 'module'})
+        worker = new Worker(new URL('./detector.js', import.meta.url), {
+            type: 'module',
+        })
 
         worker.onmessage = (e) => {
             const res = e.data
@@ -96,9 +101,9 @@ window.onload = () => {
 
             video.srcObject = await navigator.mediaDevices.getUserMedia({
                 video: {
-                    facingMode: {ideal: 'environment'},
-                    width: {ideal: 1080},
-                    height: {ideal: 1920}
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1080 },
+                    height: { ideal: 1920 },
                 },
             })
 
@@ -116,15 +121,21 @@ window.onload = () => {
     const renderWithEffects = () => {
         if (video.paused || isScanned) return
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
 
         const renderRect = getVideoRenderRect()
 
         ctx.drawImage(
             video,
-            0, 0, video.videoWidth, video.videoHeight,
-            renderRect.x, renderRect.y, renderRect.w, renderRect.h
-        );
+            0,
+            0,
+            video.videoWidth,
+            video.videoHeight,
+            renderRect.x,
+            renderRect.y,
+            renderRect.w,
+            renderRect.h,
+        )
 
         const minSide = Math.min(canvas.width, canvas.height)
         const baseLength = minSide * 0.9
@@ -146,18 +157,21 @@ window.onload = () => {
         ctx.closePath()
         ctx.stroke()
 
-        detectCount++;
+        detectCount++
         if (detectCount >= DETECT_INTERVAL) {
             detectCount = 0
             const w = Math.floor(baseLength)
             const h = Math.floor(triangleHeight)
             const imageData = ctx.getImageData(point1X, point3Y, w, h)
             if (worker) {
-                worker.postMessage({
-                    imageData: imageData.data,
-                    width: w,
-                    height: h
-                }, [imageData.data.buffer])
+                worker.postMessage(
+                    {
+                        imageData: imageData.data,
+                        width: w,
+                        height: h,
+                    },
+                    [imageData.data.buffer],
+                )
             }
         }
 
@@ -172,7 +186,7 @@ window.onload = () => {
         cancelAnimationFrame(renderId)
         const stream = video.srcObject
         if (stream) {
-            stream.getTracks().forEach(track => track.stop())
+            stream.getTracks().forEach((track) => track.stop())
             video.srcObject = null
         }
     }
@@ -189,13 +203,3 @@ window.onload = () => {
         terminateWorker()
     })
 }
-
-
-
-
-
-
-
-
-
-

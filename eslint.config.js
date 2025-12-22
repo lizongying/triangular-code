@@ -1,4 +1,3 @@
-// eslint.config.js
 import js from "@eslint/js";
 import globals from "globals";
 import prettier from "eslint-config-prettier";
@@ -6,40 +5,43 @@ import eslintPluginImport from "eslint-plugin-import";
 
 export default [
     {
-        ignores: ["dist/", "node_modules/"],
+        ignores: ["dist/**", "node_modules/**", "src/tests/**", "vite.config.js"],
     },
-
-    // 基础规则
-    js.configs.recommended,
-
-    // 运行环境
     {
+        files: ["src/**/*.{js}"],
+        ...js.configs.recommended,
         languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
             globals: {
                 ...globals.browser,
                 ...globals.node,
+                ...globals.worker,
             },
         },
-    },
-
-    // import 校验
-    {
         plugins: {
             import: eslintPluginImport,
         },
         rules: {
-            semi: ["error", "never"],
-            quotes: ['error', 'single', { avoidEscape: true }],
-            "import/order": [
-                "error",
+            'import/order': [
+                'error',
                 {
-                    groups: [["builtin", "external"], ["internal"], ["parent", "sibling", "index"]],
-                    "newlines-between": "always",
+                    groups: [
+                        ['builtin', 'external'],
+                        ['internal'],
+                        ['parent', 'sibling', 'index'],
+                    ],
+                    'newlines-between': 'always',
+                    alphabetize: {
+                        order: 'asc',
+                        caseInsensitive: true,
+                    },
                 },
             ],
+            // 'no-console': 'warn',
+            // 'no-debugger': 'error',
+            // 'no-unused-vars': ['warn', {argsIgnorePattern: '^_'}],
         },
     },
-
-    // 推荐关闭与 prettier 冲突的规则
     prettier,
 ];
