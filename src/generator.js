@@ -26,7 +26,7 @@ export class Generator {
         } else {
             svg = document.createElementNS(this._svgNamespace, 'svg')
             svg.setAttribute('transform', `scale(1,${this.scale})`)
-            svg.appendChild(svg)
+            container.appendChild(svg)
         }
         svg.setAttribute('width', `${size}`)
         svg.setAttribute('height', `${size}`)
