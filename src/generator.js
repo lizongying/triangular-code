@@ -2,71 +2,83 @@
  * https://github.com/lizongying/tricode
  */
 export class Generator {
-    constructor(container, text = '', bits = 3, size = 200) {
+    constructor(container, text = '', bits = 3, size = 200, canvas = false) {
         this.container = container
         this.scale = Math.sin(this.degreesToRadians(60))
 
-        this._svgNamespace = 'http://www.w3.org/2000/svg'
+        this.text = text
 
         this.bits = bits
 
-        this.text = text
+        this.size = size
 
-        this.updateSize(size)
+        this.canvas = canvas
+
+        this._svgNamespace = 'http://www.w3.org/2000/svg'
+
+        this._unitScale = 10
+
+        this.change(true)
     }
 
     updateSize(size) {
         this.size = size
-        const container = this.container
-        let svg = container.querySelector('svg')
-        if (svg) {
-            while (svg.firstChild) {
-                svg.removeChild(svg.firstChild)
-            }
-        } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg')
-            svg.setAttribute('transform', `scale(1,${this.scale})`)
-            container.appendChild(svg)
-        }
-        svg.setAttribute('width', `${size}`)
-        svg.setAttribute('height', `${size}`)
-        svg.setAttribute('viewBox', `0 0 ${size} ${size}`)
-        svg.setAttribute('style', 'forced-color-adjust: none; color: #FFFFFF; fill: #FFFFFF;');
-        this._svg = svg
-        this.encode()
+        this.change(true)
     }
 
     updateText(text) {
         this.text = text
-        const container = this.container
-        let svg = container.querySelector('svg')
-        if (svg) {
-            while (svg.firstChild) {
-                svg.removeChild(svg.firstChild)
-            }
-        } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg')
-            svg.setAttribute('transform', `scale(1,${this.scale})`)
-            container.appendChild(svg)
-        }
-        this._svg = svg
-        this.encode()
+        this.change()
     }
 
-    updateColor(bits) {
+    updateBits(bits) {
         this.bits = bits
-        const container = this.container
-        let svg = container.querySelector('svg')
-        if (svg) {
-            while (svg.firstChild) {
-                svg.removeChild(svg.firstChild)
+        this.change()
+    }
+
+    change(resize = false) {
+        if (this.canvas) {
+            let cvs = this.container.querySelector('canvas')
+            if (cvs) {
+                this.ctx.clearRect(0, 0, cvs.width, cvs.height)
+            } else {
+                cvs = document.createElement('canvas')
+                const ctx = cvs.getContext('2d')
+                ctx.imageSmoothingEnabled = false
+                ctx.globalAlpha = 1
+                this.ctx = ctx
+
+                this.container.appendChild(cvs)
             }
+            if (resize) {
+                cvs.width = this.size * this._unitScale
+                cvs.height = this.size * this._unitScale
+
+                cvs.style.width = this.size + 'px'
+                cvs.style.height = this.size + 'px'
+            }
+            this._cvs = cvs
         } else {
-            svg = document.createElementNS(this._svgNamespace, 'svg')
-            svg.setAttribute('transform', `scale(1,${this.scale})`)
-            container.appendChild(svg)
+            let svg = this.container.querySelector('svg')
+            if (svg) {
+                while (svg.firstChild) {
+                    svg.removeChild(svg.firstChild)
+                }
+            } else {
+                svg = document.createElementNS(this._svgNamespace, 'svg')
+                svg.setAttribute('transform', `scale(1,${this.scale})`)
+                svg.setAttribute('shape-rendering', `crispEdges`)
+                svg.setAttribute('style', 'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;');
+                this.container.appendChild(svg)
+            }
+            if (resize) {
+                svg.setAttribute('width', `${this.size}`)
+                svg.setAttribute('height', `${this.size}`)
+                svg.setAttribute('viewBox', `0 0 ${this.size} ${this.size}`)
+            }
+            this._svg = svg
         }
-        this._svg = svg
+
         this.encode()
     }
 
@@ -82,16 +94,15 @@ export class Generator {
     stringToBits(str) {
         const encoder = new TextEncoder()
         const coreBytes = encoder.encode(str)
-        // 2. 拼接1个0作为\0分隔符（仅1个，满足分隔需求）
         let byteArray = new Uint8Array(coreBytes.length + 1)
-        byteArray.set(coreBytes) // 复制核心字节
-        byteArray[coreBytes.length] = 0 // 末尾加1个0（\0分隔符）
+        byteArray.set(coreBytes)
+        byteArray[coreBytes.length] = 0
 
-        const sign = '01'
         const signArr = [0, 1]
+        let bitString = '01'
+        const res = []
         switch (this.bits) {
-            case 3: {
-                let bitString = sign
+            case 3:
                 for (const byte of byteArray) {
                     bitString += byte.toString(2).padStart(8, '0')
                 }
@@ -100,28 +111,23 @@ export class Generator {
                     bitString += '0'
                 }
 
-                const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
                     res.push(parseInt(bitString.slice(i, i + 3), 2))
                 }
 
                 return res
-            }
-            case 2: {
-                let bitString = sign
+            case 2:
                 for (const byte of byteArray) {
                     bitString += byte.toString(2).padStart(8, '0')
                 }
 
-                const res = []
                 for (let i = 0; i < bitString.length; i += 2) {
                     res.push(parseInt(bitString.slice(i, i + 2), 2))
                 }
 
                 return res
-            }
 
-            default: {
+            case 1:
                 return signArr.concat(
                     Array.from(byteArray)
                         .flatMap((byte) =>
@@ -129,19 +135,19 @@ export class Generator {
                         )
                         .map(Number),
                 )
-            }
+
+            default:
         }
     }
 
-    //
     numberToBits(str) {
         const bitArray = numericToQrBits(str)
 
-        const sign = '00'
         const signArr = [0, 0]
+        let bitString = '00'
+        const res = []
         switch (this.bits) {
             case 3: {
-                let bitString = sign
                 for (const bit of bitArray) {
                     bitString += bit
                 }
@@ -150,7 +156,6 @@ export class Generator {
                     bitString += '0'
                 }
 
-                const res = []
                 for (let i = 0; i < bitString.length; i += 3) {
                     res.push(parseInt(bitString.slice(i, i + 3), 2))
                 }
@@ -158,12 +163,10 @@ export class Generator {
                 return res
             }
             case 2: {
-                let bitString = sign
                 for (const bit of bitArray) {
                     bitString += bit
                 }
 
-                const res = []
                 for (let i = 0; i < bitString.length; i += 2) {
                     res.push(parseInt(bitString.slice(i, i + 2), 2))
                 }
@@ -171,28 +174,11 @@ export class Generator {
                 return res
             }
 
-            default: {
+            case 1:
                 return signArr.concat(bitArray.split('').map(Number))
-            }
-        }
-    }
 
-    defaultColor() {
-        let colors = colors2
-        switch (this.bits) {
-            case 3: {
-                colors = 8
-                break
-            }
-            case 2: {
-                colors = 4
-                break
-            }
-            default: {
-                colors = 2
-            }
+            default:
         }
-        return Math.floor(Math.random() * colors)
     }
 
     /**
@@ -205,24 +191,19 @@ export class Generator {
 
         let colorCount = 2
         switch (this.bits) {
-            case 3: {
+            case 3:
                 colorCount = 8
                 break
-            }
-            case 2: {
+            case 2:
                 colorCount = 4
                 break
-            }
-            case 1: {
+            case 1:
                 colorCount = 2
                 break
-            }
-            default: {
-                colorCount = 2
-            }
+            default:
         }
 
-        return Array.from({ length: fillLength }, () => {
+        return Array.from({length: fillLength}, () => {
             return Math.floor(Math.random() * colorCount)
         })
     }
@@ -230,20 +211,17 @@ export class Generator {
     /**
      * Pads the input data to the specified TC version's capacity.
      * @param {Array} data - The input data array to be padded.
-     * @param {number} version - The TC version (determines target capacity).
+     * @param {number} capacity - The TC target capacity.
      * @returns {Array} - The padded data array (original data + padding if needed).
      * @throws {Error} - If the version is unsupported or data is too long.
      */
-    padDataToVersion(data, version) {
-        const capacity = table[version]
-        if (!capacity) throw new Error(`Unsupported TC version: ${version}`)
+    padDataToVersion(data, capacity) {
         if (data.length > capacity) {
             throw new Error(
-                `Data length (${data.length}) exceeds capacity (${capacity}) for TC version ${version}`,
+                `Data length (${data.length}) exceeds capacity (${capacity})`,
             )
         }
         if (data.length < capacity) {
-            // return data.concat(new Array(capacity - data.length).fill(0))
             return data.concat(this.fillRandomColor(capacity - data.length))
         }
         return data
@@ -262,20 +240,19 @@ export class Generator {
 
             // Return the first version that can accommodate the data length
             if (dataLength <= capacity) {
-                return { version, capacity }
+                return {version, capacity}
             }
         }
 
         // If no version is found (data is too long for all supported versions)
         throw new Error(
             `Data length (${dataLength}) exceeds the maximum supported TC capacity. ` +
-                `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
+            `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
         )
     }
 
     encode(text = this.text) {
         this.text = text
-        // data = new Array(Number(text)).fill(this.defaultColor())
 
         let data = []
         if (/^\d+$/.test(text)) {
@@ -284,17 +261,12 @@ export class Generator {
             data = this.stringToBits(text)
         }
 
-        console.log('data', data)
+        // console.log('data', data)
 
-        const { version, capacity } = this.getRequiredVersion(data.length)
-        console.log(`version: ${version}, capacity: ${capacity}`)
+        const {version, capacity} = this.getRequiredVersion(data.length)
+        // console.log(`version: ${version}, capacity: ${capacity}`)
 
-        // const a = 32
-        // if (data.length < a) {
-        //     data = data.concat(new Array(a - data.length).fill(0));
-        // }
-
-        data = this.padDataToVersion(data, version)
+        data = this.padDataToVersion(data, capacity)
 
         let arr = [
             1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0,
@@ -359,12 +331,6 @@ export class Generator {
             }
         }
 
-        // console.log('max', 2 * i + 17, data.length)
-        //
-        // const version1 = Math.ceil((2 * i + 17 - 13) / 10);
-        // console.log('version', version1)
-
-        //如果 2 * i + 17 不夠23/33/43/... newArrAll繼續填充下一行，保證下行比上一行多2個
         newArrAll.push(Array(2 * i + 17).fill(0))
 
         let one = this.size / (i + 9)
@@ -387,14 +353,6 @@ export class Generator {
                     c = [x + ((ii * one) / 2 + one / 2), y]
                 }
 
-                const triangle = document.createElementNS(
-                    this._svgNamespace,
-                    'polygon',
-                )
-                triangle.setAttribute(
-                    'points',
-                    `${a.join(',')} ${b.join(',')} ${c.join(',')}`,
-                )
                 let colors = colors2
                 switch (this.bits) {
                     case 3: {
@@ -409,16 +367,48 @@ export class Generator {
                         colors = colors2
                     }
                 }
-                triangle.setAttribute('fill', argbToHex(colors[vv]))
-                this._svg.appendChild(triangle)
+
+                if (this.canvas) {
+                    drawTriangle(this.ctx,
+                        [a[0] * this._unitScale, a[1] * this.scale * this._unitScale],
+                        [b[0] * this._unitScale, b[1] * this.scale * this._unitScale],
+                        [c[0] * this._unitScale, c[1] * this.scale * this._unitScale],
+                        argbToHex(colors[vv]))
+                } else {
+                    const triangle = document.createElementNS(
+                        this._svgNamespace,
+                        'polygon',
+                    )
+                    triangle.setAttribute(
+                        'points',
+                        `${a.join(',')} ${b.join(',')} ${c.join(',')}`,
+                    )
+                    triangle.setAttribute('fill', argbToHex(colors[vv]))
+                    this._svg.appendChild(triangle)
+                }
             })
         })
     }
 }
 
+const drawTriangle = (ctx, a, b, c, color) => {
+    const [ax, ay] = a.map(v => Math.round(v))
+    const [bx, by] = b.map(v => Math.round(v))
+    const [cx, cy] = c.map(v => Math.round(v))
+
+    ctx.beginPath()
+    ctx.moveTo(ax, ay)
+    ctx.lineTo(bx, by)
+    ctx.lineTo(cx, cy)
+    ctx.closePath()
+
+    ctx.fillStyle = color
+    ctx.fill()
+}
+
 // (x-5)/2 * (x-5)/2-50
 // ((x-5)/2)**2 -50
-// 32特殊
+// 25*2+13=63
 const table = {
     23: 32, //5
     33: 146, //14-4 = 10
@@ -429,8 +419,6 @@ const table = {
     83: 1471,
     93: 1886,
 }
-
-// 25*2+13=63
 
 const colors2 = [
     0xffffff, //white
@@ -464,38 +452,29 @@ const numericToQrBits = (numStr, lengthBits = 10) => {
     const strLength = numStr.length
     const lengthBinary = strLength.toString(2).padStart(lengthBits, '0')
 
-    // 5. 處理數據位（3位一組編碼）
     let dataBits = ''
-    // 拆分為每3位一組
     const groups = []
     for (let i = 0; i < numStr.length; i += 3) {
         groups.push(numStr.slice(i, i + 3))
     }
 
-    // 逐組轉換為對應位數的二進位
     groups.forEach((group) => {
         const num = parseInt(group, 10)
         let binary
         switch (group.length) {
             case 3:
-                // 3位數 → 10位二進位
                 binary = num.toString(2).padStart(10, '0')
                 break
             case 2:
-                // 2位數 → 7位二進位
                 binary = num.toString(2).padStart(7, '0')
                 break
             case 1:
-                // 1位數 → 4位二進位
                 binary = num.toString(2).padStart(4, '0')
                 break
             default:
-                throw new Error('分組異常，請檢查輸入')
         }
         dataBits += binary
     })
-
-    // 6. 組合完整的位元串（模式 + 長度 + 數據）
 
     return lengthBinary + dataBits
 }

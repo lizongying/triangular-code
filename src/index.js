@@ -1,15 +1,20 @@
-import { Generator } from './generator.js'
+import {Generator} from './generator.js'
+
+const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
+const isAndroid = /Android/i.test(navigator.userAgent)
+
+const isCanvas = isDarkMode && isAndroid
 
 window.onload = () => {
     const svg = document.querySelector('#svg')
     const input = document.querySelector('#input')
     const slider = document.querySelector('#slider')
     const bits = document.querySelector('[name="bits"][checked]')
-    console.log('bits', bits.value)
 
     let size = 200
     slider.value = size
-    let instance = new Generator(svg, input.value, Number(bits.value), size)
+
+    let instance = new Generator(svg, input.value, Number(bits.value), size, isCanvas)
 
     input.addEventListener('input', () => {
         instance.updateText(input.value)
@@ -40,37 +45,50 @@ window.onload = () => {
 
     document.querySelector('#export').onclick = (e) => {
         e.preventDefault()
-        const svg = container.querySelector('svg')
-        const serializer = new XMLSerializer()
-        const svgString = serializer.serializeToString(svg)
-        const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
-        const img = new Image()
-        const svgBlob = new Blob([svgString], {
-            type: 'image/svg+xml;charset=utf-8',
-        })
-        const url = URL.createObjectURL(svgBlob)
-        img.onload = () => {
-            canvas.width = svg.width.baseVal.value
-            canvas.height = svg.height.baseVal.value
-            ctx.drawImage(img, 0, 0)
+        if (isCanvas) {
+            const cvs = container.querySelector('canvas')
+            if (!cvs) {
+                return
+            }
             const link = document.createElement('a')
             link.download = 'tc.png'
-            link.href = canvas.toDataURL('image/png')
+            link.href = cvs.toDataURL('image/png')
+            document.body.appendChild(link)
             link.click()
-            URL.revokeObjectURL(url)
+            document.body.removeChild(link)
+        } else {
+            const svg = container.querySelector('svg')
+            if (!svg) {
+                return
+            }
+            const serializer = new XMLSerializer()
+            const svgString = serializer.serializeToString(svg)
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            const img = new Image()
+            const svgBlob = new Blob([svgString], {
+                type: 'image/svg+xml;charset=utf-8',
+            })
+            const url = URL.createObjectURL(svgBlob)
+            img.onload = () => {
+                canvas.width = svg.width.baseVal.value
+                canvas.height = svg.height.baseVal.value
+                ctx.drawImage(img, 0, 0)
+                const link = document.createElement('a')
+                link.download = 'tc.png'
+                link.href = canvas.toDataURL('image/png')
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                URL.revokeObjectURL(url)
+            }
+            img.src = url
         }
-        img.src = url
     }
-
-    // document.querySelector('button').onclick = _ => {
-    //     input.value = Number(input.value) + 1
-    //     instance.updateText(input.value);
-    // }
 
     document.querySelectorAll('input[name="bits"]').forEach((checkbox) => {
         checkbox.addEventListener('change', (event) => {
-            instance.updateColor(Number(Number(event.target.value)))
+            instance.updateBits(Number(Number(event.target.value)))
         })
     })
 }

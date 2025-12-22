@@ -10,7 +10,7 @@ window.onload = () => {
 
     const container = document.getElementById('canvasContainer')
 
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const ctx = canvas.getContext('2d', {willReadFrequently: true})
 
     let renderId = 0
 
@@ -53,7 +53,7 @@ window.onload = () => {
             renderY = (canvasH - renderH) / 2
         }
 
-        return { x: renderX, y: renderY, w: renderW, h: renderH }
+        return {x: renderX, y: renderY, w: renderW, h: renderH}
     }
 
     const playBeep = () => {
@@ -72,38 +72,48 @@ window.onload = () => {
     }
 
     const initWorker = () => {
-        worker = new Worker(new URL('./detector.js', import.meta.url), {
-            type: 'module',
-        })
-
-        worker.onmessage = (e) => {
-            const res = e.data
-            // console.log('res', res)
-            if (res.success) {
-                // isScanned = true
-                // alert(`掃碼成功：${res.text}`)
-                result.textContent = res.text
-                playBeep()
-                // stopCamera()
-                // terminateWorker()
-            }
+        if (worker) {
+            return
         }
 
-        worker.onerror = (err) => {
+        try {
+            worker = new Worker(new URL('./detector.js', import.meta.url), {
+                type: 'module',
+            })
+
+            worker.onmessage = (e) => {
+                const res = e.data
+                // console.log('res', res)
+                if (res.success) {
+                    // isScanned = true
+                    // alert(`掃碼成功：${res.text}`)
+                    result.textContent = res.text
+                    playBeep()
+                    // stopCamera()
+                    // terminateWorker()
+                }
+            }
+
+            worker.onerror = (err) => {
+                console.error(err)
+                terminateWorker()
+            }
+        } catch (err) {
             console.error(err)
-            terminateWorker()
+            worker = null
         }
     }
 
     async function initCamera() {
+        if (video.srcObject) {
+            return
+        }
         try {
-            initWorker()
-
-            video.srcObject = await navigator.mediaDevices.getUserMedia({
+            video.srcObject = await navigator.mediaDevices?.getUserMedia({
                 video: {
-                    facingMode: { ideal: 'environment' },
-                    width: { ideal: 1080 },
-                    height: { ideal: 1920 },
+                    facingMode: {ideal: 'environment'},
+                    width: {ideal: 1080},
+                    height: {ideal: 1920},
                 },
             })
 
@@ -114,7 +124,6 @@ window.onload = () => {
             }
         } catch (err) {
             console.error(err)
-            terminateWorker()
         }
     }
 
@@ -178,11 +187,10 @@ window.onload = () => {
         renderId = requestAnimationFrame(renderWithEffects)
     }
 
-    window.addEventListener('resize', setCanvasFullContainer)
-
-    initCamera().then()
-
     const stopCamera = () => {
+        if (!renderId) {
+            return
+        }
         cancelAnimationFrame(renderId)
         const stream = video.srcObject
         if (stream) {
@@ -198,8 +206,18 @@ window.onload = () => {
         }
     }
 
+    window.addEventListener('pageshow', () => {
+        initWorker()
+        initCamera().then()
+    })
+
     window.addEventListener('beforeunload', () => {
         stopCamera()
         terminateWorker()
     })
+
+    window.addEventListener('resize', setCanvasFullContainer)
+
+    initWorker()
+    initCamera().then()
 }

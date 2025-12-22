@@ -3,7 +3,12 @@ import {defineConfig} from 'vite'
 import {createHtmlPlugin} from 'vite-plugin-html'
 
 export default defineConfig({
-    base: '/tricode/',
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+    },
+    base: process.env.NODE_ENV === 'production' ? '/tricode/' : '/',
     build: {
         minify: 'oxc',
         rollupOptions: {
