@@ -31,6 +31,7 @@ export class Generator {
         svg.setAttribute('width', `${size}`)
         svg.setAttribute('height', `${size}`)
         svg.setAttribute('viewBox', `0 0 ${size} ${size}`)
+        svg.setAttribute('style', 'forced-color-adjust: none; color: #FFFFFF; fill: #FFFFFF;');
         this._svg = svg
         this.encode()
     }
