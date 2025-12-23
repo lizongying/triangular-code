@@ -66,7 +66,7 @@ export class Generator {
                 }
             } else {
                 svg = document.createElementNS(this._svgNamespace, 'svg')
-                svg.setAttribute('transform', `scale(1,${this.scale})`)
+                svg.setAttribute('color-interpolation', `sRGB`)
                 svg.setAttribute('shape-rendering', `crispEdges`)
                 svg.setAttribute('style', 'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;');
                 this.container.appendChild(svg)
@@ -343,14 +343,16 @@ export class Generator {
                 let a
                 let b
                 let c
+                const y0 = y * this.scale
+                const y1 = (y + one) * this.scale
                 if (ii % 2 === 0) {
-                    a = [x + (ii * one) / 2, y]
-                    b = [x + (ii * one) / 2 - one / 2, y + one]
-                    c = [x + ((ii * one) / 2 + one / 2), y + one]
+                    a = [x + (ii * one) / 2, y0]
+                    b = [x + (ii * one) / 2 - one / 2, y1]
+                    c = [x + (ii * one) / 2 + one / 2, y1]
                 } else {
-                    a = [x + (ii * one) / 2, y + one]
-                    b = [x + (ii * one) / 2 - one / 2, y]
-                    c = [x + ((ii * one) / 2 + one / 2), y]
+                    a = [x + (ii * one) / 2, y1]
+                    b = [x + (ii * one) / 2 - one / 2, y0]
+                    c = [x + (ii * one) / 2 + one / 2, y0]
                 }
 
                 let colors = colors2

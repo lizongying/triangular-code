@@ -17,7 +17,7 @@ window.onload = () => {
     let detectCount = 0
     let isScanned = false
 
-    const DETECT_INTERVAL = 60
+    const DETECT_INTERVAL = 30
 
     let worker = null
 

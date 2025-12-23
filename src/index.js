@@ -45,13 +45,18 @@ window.onload = () => {
 
     document.querySelector('#export').onclick = (e) => {
         e.preventDefault()
+        toPng()
+        // toSvg()
+    }
+
+    const toPng = () => {
         if (isCanvas) {
             const cvs = container.querySelector('canvas')
             if (!cvs) {
                 return
             }
             const link = document.createElement('a')
-            link.download = 'tc.png'
+            link.download = `tc-${Date.now()}.png`
             link.href = cvs.toDataURL('image/png')
             document.body.appendChild(link)
             link.click()
@@ -65,17 +70,18 @@ window.onload = () => {
             const svgString = serializer.serializeToString(svg)
             const canvas = document.createElement('canvas')
             const ctx = canvas.getContext('2d')
+            ctx.imageSmoothingEnabled = false
             const img = new Image()
             const svgBlob = new Blob([svgString], {
                 type: 'image/svg+xml;charset=utf-8',
             })
             const url = URL.createObjectURL(svgBlob)
             img.onload = () => {
-                canvas.width = svg.width.baseVal.value
-                canvas.height = svg.height.baseVal.value
-                ctx.drawImage(img, 0, 0)
+                canvas.width = svg.width.baseVal.value * 10
+                canvas.height = svg.height.baseVal.value * 10
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
                 const link = document.createElement('a')
-                link.download = 'tc.png'
+                link.download = `tc-${Date.now()}.png`
                 link.href = canvas.toDataURL('image/png')
                 document.body.appendChild(link)
                 link.click()
@@ -83,6 +89,40 @@ window.onload = () => {
                 URL.revokeObjectURL(url)
             }
             img.src = url
+        }
+    }
+
+    const toSvg = () => {
+        if (isCanvas) {
+            const cvs = container.querySelector('canvas')
+            if (!cvs) {
+                return
+            }
+            const link = document.createElement('a')
+            link.download = `tc-${Date.now()}.png`
+            link.href = cvs.toDataURL('image/png')
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+        } else {
+            const svg = container.querySelector('svg')
+            if (!svg) {
+                return
+            }
+            const serializer = new XMLSerializer()
+            const svgString = serializer.serializeToString(svg)
+
+            const svgBlob = new Blob([svgString], {
+                type: 'image/svg+xml;charset=utf-8',
+            })
+            const url = URL.createObjectURL(svgBlob)
+            const link = document.createElement('a')
+            link.download = `tc-${Date.now()}.svg`
+            link.href = url
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            URL.revokeObjectURL(url)
         }
     }
 
