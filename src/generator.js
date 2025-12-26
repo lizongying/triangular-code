@@ -68,7 +68,10 @@ export class Generator {
                 svg = document.createElementNS(this._svgNamespace, 'svg')
                 svg.setAttribute('color-interpolation', `sRGB`)
                 svg.setAttribute('shape-rendering', `crispEdges`)
-                svg.setAttribute('style', 'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;');
+                svg.setAttribute(
+                    'style',
+                    'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;',
+                )
                 this.container.appendChild(svg)
             }
             if (resize) {
@@ -182,9 +185,9 @@ export class Generator {
     }
 
     /**
-     * 生成填充段（随机颜色，替代固定默认色）
-     * @param {number} fillLength - 二维码总模块数
-     * @returns {Array} 随机填充的数组
+     * Generate a filled segment (with random colors)
+     * @param {number} fillLength - Total number of modules in the tricode
+     * @returns {Array} - An array filled randomly
      */
     fillRandomColor(fillLength) {
         if (fillLength <= 0) return []
@@ -203,15 +206,15 @@ export class Generator {
             default:
         }
 
-        return Array.from({length: fillLength}, () => {
+        return Array.from({ length: fillLength }, () => {
             return Math.floor(Math.random() * colorCount)
         })
     }
 
     /**
-     * Pads the input data to the specified TC version's capacity.
+     * Pads the input data to the specified tricode version's capacity.
      * @param {Array} data - The input data array to be padded.
-     * @param {number} capacity - The TC target capacity.
+     * @param {number} capacity - The tricode target capacity.
      * @returns {Array} - The padded data array (original data + padding if needed).
      * @throws {Error} - If the version is unsupported or data is too long.
      */
@@ -228,26 +231,26 @@ export class Generator {
     }
 
     /**
-     * Determines the minimum TC version required to store the given data length.
+     * Determines the minimum tricode version required to store the given data length.
      * @param {number} dataLength - The length of the data to be encoded.
-     * @returns {{version: number, capacity: number}} - An object containing the suitable TC version and its capacity.
-     * @throws {Error} - If the data length exceeds all supported TC versions.
+     * @returns {{version: number, capacity: number}} - An object containing the suitable tricode version and its capacity.
+     * @throws {Error} - If the data length exceeds all supported tricode versions.
      */
     getRequiredVersion(dataLength) {
-        // Iterate through all TC versions and their capacities
+        // Iterate through all tricode versions and their capacities
         for (const [versionStr, capacity] of Object.entries(table)) {
             const version = Number(versionStr) // Convert version to number (since Object.entries returns strings)
 
             // Return the first version that can accommodate the data length
             if (dataLength <= capacity) {
-                return {version, capacity}
+                return { version, capacity }
             }
         }
 
         // If no version is found (data is too long for all supported versions)
         throw new Error(
-            `Data length (${dataLength}) exceeds the maximum supported TC capacity. ` +
-            `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
+            `Data length (${dataLength}) exceeds the maximum supported tricode capacity. ` +
+                `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
         )
     }
 
@@ -263,7 +266,7 @@ export class Generator {
 
         // console.log('data', data)
 
-        const {version, capacity} = this.getRequiredVersion(data.length)
+        const { version, capacity } = this.getRequiredVersion(data.length)
         // console.log(`version: ${version}, capacity: ${capacity}`)
 
         data = this.padDataToVersion(data, capacity)
@@ -276,6 +279,14 @@ export class Generator {
             arr.push(0)
         }
         arr = arr.concat(data)
+
+        let arr1 = [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0, 0],
+            [0, 0, 1, 0, 0],
+        ]
 
         let arr2 = [
             [0, 0, 0],
@@ -309,13 +320,10 @@ export class Generator {
 
             lastIdx = newIdx
 
-            if (arr.length - newIdx <= last * 5) {
+            if (arr.length - newIdx <= last * 5 - 4) {
                 for (let j = 0; j < 5; j++) {
-                    let newArr = []
-
-                    newArr.push(0, 0)
-
-                    let newIdx = lastIdx + last
+                    let newArr = arr1[j]
+                    let newIdx = lastIdx + last - (arr1[j].length - 2)
                     newArr.push(...arr.slice(lastIdx, newIdx))
 
                     newArr.push(...Array(last - newArr.length + 2).fill(0))
@@ -338,20 +346,19 @@ export class Generator {
         newArrAll.forEach((v, i) => {
             let x = this.size / 2 - (i * one) / 2
             let y = i * one
+            const y0 = y * this.scale
+            const y1 = (y + one) * this.scale
+
+            let a = [x - one / 2, y1]
+            let b = [x - one, y0]
+            let c = [x, y0]
 
             v.forEach((vv, ii) => {
-                let a
-                let b
-                let c
-                const y0 = y * this.scale
-                const y1 = (y + one) * this.scale
+                b = a
+                a = c
                 if (ii % 2 === 0) {
-                    a = [x + (ii * one) / 2, y0]
-                    b = [x + (ii * one) / 2 - one / 2, y1]
                     c = [x + (ii * one) / 2 + one / 2, y1]
                 } else {
-                    a = [x + (ii * one) / 2, y1]
-                    b = [x + (ii * one) / 2 - one / 2, y0]
                     c = [x + (ii * one) / 2 + one / 2, y0]
                 }
 
@@ -371,11 +378,22 @@ export class Generator {
                 }
 
                 if (this.canvas) {
-                    drawTriangle(this.ctx,
-                        [a[0] * this._unitScale, a[1] * this.scale * this._unitScale],
-                        [b[0] * this._unitScale, b[1] * this.scale * this._unitScale],
-                        [c[0] * this._unitScale, c[1] * this.scale * this._unitScale],
-                        argbToHex(colors[vv]))
+                    drawTriangle(
+                        this.ctx,
+                        [
+                            a[0] * this._unitScale,
+                            a[1] * this.scale * this._unitScale,
+                        ],
+                        [
+                            b[0] * this._unitScale,
+                            b[1] * this.scale * this._unitScale,
+                        ],
+                        [
+                            c[0] * this._unitScale,
+                            c[1] * this.scale * this._unitScale,
+                        ],
+                        argbToHex(colors[vv]),
+                    )
                 } else {
                     const triangle = document.createElementNS(
                         this._svgNamespace,
@@ -394,9 +412,9 @@ export class Generator {
 }
 
 const drawTriangle = (ctx, a, b, c, color) => {
-    const [ax, ay] = a.map(v => Math.round(v))
-    const [bx, by] = b.map(v => Math.round(v))
-    const [cx, cy] = c.map(v => Math.round(v))
+    const [ax, ay] = a.map((v) => Math.round(v))
+    const [bx, by] = b.map((v) => Math.round(v))
+    const [cx, cy] = c.map((v) => Math.round(v))
 
     ctx.beginPath()
     ctx.moveTo(ax, ay)
@@ -412,14 +430,14 @@ const drawTriangle = (ctx, a, b, c, color) => {
 // ((x-5)/2)**2 -50
 // 25*2+13=63
 const table = {
-    23: 32, //5
-    33: 146, //14-4 = 10
-    43: 311, //19-4 = 15
-    53: 526, //24-4 = 20
-    63: 791, //29-4 = 25
-    73: 1106,
-    83: 1471,
-    93: 1886,
+    23: 32 - 4, //5
+    33: 146 - 4, //14-4 = 10
+    43: 311 - 4, //19-4 = 15
+    53: 526 - 4, //24-4 = 20
+    63: 791 - 4, //29-4 = 25
+    73: 1106 - 4,
+    83: 1471 - 4,
+    93: 1886 - 4,
 }
 
 const colors2 = [

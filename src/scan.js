@@ -10,7 +10,7 @@ window.onload = () => {
 
     const container = document.getElementById('canvasContainer')
 
-    const ctx = canvas.getContext('2d', {willReadFrequently: true})
+    const ctx = canvas.getContext('2d', { willReadFrequently: true })
 
     let renderId = 0
 
@@ -53,7 +53,7 @@ window.onload = () => {
             renderY = (canvasH - renderH) / 2
         }
 
-        return {x: renderX, y: renderY, w: renderW, h: renderH}
+        return { x: renderX, y: renderY, w: renderW, h: renderH }
     }
 
     const playBeep = () => {
@@ -111,9 +111,9 @@ window.onload = () => {
         try {
             video.srcObject = await navigator.mediaDevices?.getUserMedia({
                 video: {
-                    facingMode: {ideal: 'environment'},
-                    width: {ideal: 1080},
-                    height: {ideal: 1920},
+                    facingMode: { ideal: 'environment' },
+                    width: { ideal: 1080 },
+                    height: { ideal: 1920 },
                 },
             })
 

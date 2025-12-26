@@ -1,4 +1,4 @@
-import {Generator} from './generator.js'
+import { Generator } from './generator.js'
 
 const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
 const isAndroid = /Android/i.test(navigator.userAgent)
@@ -14,7 +14,13 @@ window.onload = () => {
     let size = 200
     slider.value = size
 
-    let instance = new Generator(svg, input.value, Number(bits.value), size, isCanvas)
+    let instance = new Generator(
+        svg,
+        input.value,
+        Number(bits.value),
+        size,
+        isCanvas,
+    )
 
     input.addEventListener('input', () => {
         instance.updateText(input.value)
@@ -56,7 +62,7 @@ window.onload = () => {
                 return
             }
             const link = document.createElement('a')
-            link.download = `tc-${Date.now()}.png`
+            link.download = `tricode-${Date.now()}.png`
             link.href = cvs.toDataURL('image/png')
             document.body.appendChild(link)
             link.click()
@@ -81,7 +87,7 @@ window.onload = () => {
                 canvas.height = svg.height.baseVal.value * 10
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
                 const link = document.createElement('a')
-                link.download = `tc-${Date.now()}.png`
+                link.download = `tricode-${Date.now()}.png`
                 link.href = canvas.toDataURL('image/png')
                 document.body.appendChild(link)
                 link.click()
@@ -99,7 +105,7 @@ window.onload = () => {
                 return
             }
             const link = document.createElement('a')
-            link.download = `tc-${Date.now()}.png`
+            link.download = `tricode-${Date.now()}.png`
             link.href = cvs.toDataURL('image/png')
             document.body.appendChild(link)
             link.click()
@@ -117,7 +123,7 @@ window.onload = () => {
             })
             const url = URL.createObjectURL(svgBlob)
             const link = document.createElement('a')
-            link.download = `tc-${Date.now()}.svg`
+            link.download = `tricode-${Date.now()}.svg`
             link.href = url
             document.body.appendChild(link)
             link.click()

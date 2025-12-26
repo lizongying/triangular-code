@@ -453,21 +453,29 @@ export class Parser {
     }
 }
 
+/**
+ * Retrieves the RGB values of a pixel at a given coordinate in an image.
+ * @param {Uint8ClampedArray} imageData - The image data array containing pixel information.
+ * @param {number} width - The width of the image.
+ * @param {number} x - The x-coordinate of the pixel.
+ * @param {number} y - The y-coordinate of the pixel.
+ * @returns {Object} An object containing the red (r), green (g), and blue (b) components of the pixel.
+ */
 function getPixelRGB(imageData, width, x, y) {
     const index = (y * width + x) * 4
+    // Ignore transparency
     return {
-        r: imageData[index], // 紅色通道 (0-255)
-        g: imageData[index + 1], // 綠色通道 (0-255)
-        b: imageData[index + 2], // 藍色通道 (0-255)
-        a: imageData[index + 3], // 透明度 (0-255)
+        r: imageData[index],
+        g: imageData[index + 1],
+        b: imageData[index + 2],
     }
 }
 
 /**
- * 計算兩個 RGB 顏色之間的歐氏距離的平方（省略平方根以提升性能）。
- * @param {number[]} rgb1 - 第一個顏色的 RGB 值，格式為 [R, G, B]，範圍 0-255。
- * @param {number[]} rgb2 - 第二個顏色的 RGB 值，格式為 [R, G, B]，範圍 0-255。
- * @returns {number} 兩個顏色之間的距離平方（數值越小，顏色越接近）。
+ * Calculate the squared Euclidean distance between two RGB colors (omitting the square root to improve performance).
+ * @param {number[]} rgb1 - The RGB values of the first color, in the format [R, G, B], with values ranging from 0 to 255.
+ * @param {number[]} rgb2 - The RGB values of the second color, in the format [R, G, B], with values ranging from 0 to 255.
+ * @returns {number} - The squared distance between the two colors (the smaller the value, the closer the colors are).
  */
 function rgbDistance(rgb1, rgb2) {
     return (
