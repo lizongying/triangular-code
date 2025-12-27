@@ -152,7 +152,7 @@ window.onload = () => {
         const point1Y = canvas.height / 2 + triangleHeight / 3
         const point3Y = point1Y - triangleHeight
 
-        tip.style.top = `calc(${point3Y / dpr}px - 2.5rem)`
+        tip.style.top = `calc(${point3Y / dpr}px - 3rem)`
         result.style.top = `calc(${point1Y / dpr}px + 1rem)`
 
         detectCount++
