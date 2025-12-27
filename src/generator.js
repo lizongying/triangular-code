@@ -13,7 +13,8 @@ export class Generator {
 
         this.size = size
 
-        this._unitScale = 10
+        // this.dpr = window.devicePixelRatio || 1
+        this.dpr = 10
 
         const cvs = document.createElement('canvas')
         const ctx = cvs.getContext('2d')
@@ -64,8 +65,8 @@ export class Generator {
     change(resize = false) {
         this.ctx.clearRect(0, 0, this.cvs.width, this.cvs.height)
         if (resize) {
-            this.cvs.width = this.size * this._unitScale
-            this.cvs.height = this.size * this._unitScale
+            this.cvs.width = this.size * this.dpr
+            this.cvs.height = this.size * this.dpr
 
             this.cvs.style.width = this.size + 'px'
             this.cvs.style.height = this.size + 'px'
@@ -383,9 +384,10 @@ export class Generator {
 
                 drawTriangle(
                     this.ctx,
-                    a.map((v) => v * this._unitScale),
-                    b.map((v) => v * this._unitScale),
-                    c.map((v) => v * this._unitScale),
+                    this.dpr,
+                    a,
+                    b,
+                    c,
                     argbToHex(colors[vv]),
                     up,
                 )
@@ -410,12 +412,13 @@ export class Generator {
 // const OVERLAP = 1 / DPR / 2
 const OVERLAP = 1
 
-const drawTriangle = (ctx, a, b, c, color, up = true) => {
-    const [ax, ay] = a
-    const [bx, by] = b
-    const [cx, cy] = c
+const drawTriangle = (ctx, dpr, a, b, c, color, up = true) => {
+    const [ax, ay] = a.map((v) => v * dpr)
+    const [bx, by] = b.map((v) => v * dpr)
+    const [cx, cy] = c.map((v) => v * dpr)
 
     ctx.save()
+    // ctx.scale(dpr, dpr)
     ctx.beginPath()
     const hypotenuseExpand = Math.sqrt(OVERLAP * OVERLAP * 2)
     if (up) {

@@ -3,14 +3,12 @@
  */
 window.onload = () => {
     const video = document.getElementById('webcam')
-
+    const tip = document.getElementById('tip')
     const result = document.getElementById('result')
-
     const canvas = document.getElementById('canvas')
-
     const container = document.getElementById('canvasContainer')
 
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })
+    const ctx = canvas.getContext('2d', {willReadFrequently: true})
 
     let renderId = 0
 
@@ -53,7 +51,7 @@ window.onload = () => {
             renderY = (canvasH - renderH) / 2
         }
 
-        return { x: renderX, y: renderY, w: renderW, h: renderH }
+        return {x: renderX, y: renderY, w: renderW, h: renderH}
     }
 
     const playBeep = () => {
@@ -111,9 +109,9 @@ window.onload = () => {
         try {
             video.srcObject = await navigator.mediaDevices?.getUserMedia({
                 video: {
-                    facingMode: { ideal: 'environment' },
-                    width: { ideal: 1080 },
-                    height: { ideal: 1920 },
+                    facingMode: {ideal: 'environment'},
+                    width: {ideal: 1080},
+                    height: {ideal: 1920},
                 },
             })
 
@@ -151,20 +149,11 @@ window.onload = () => {
         const triangleHeight = baseLength * (Math.sqrt(3) / 2)
 
         const point1X = (canvas.width - baseLength) / 2
-        const point1Y = (canvas.height + triangleHeight) / 2
-        const point2X = (canvas.width + baseLength) / 2
-        const point2Y = point1Y
-        const point3X = canvas.width / 2
-        const point3Y = (canvas.height - triangleHeight) / 2
+        const point1Y = canvas.height / 2 + triangleHeight / 3
+        const point3Y = point1Y - triangleHeight
 
-        ctx.strokeStyle = '#ffffff'
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(point1X, point1Y)
-        ctx.lineTo(point2X, point2Y)
-        ctx.lineTo(point3X, point3Y)
-        ctx.closePath()
-        ctx.stroke()
+        tip.style.top = `calc(${point3Y / dpr}px - 2.5rem)`
+        result.style.top = `calc(${point1Y / dpr}px + 1rem)`
 
         detectCount++
         if (detectCount >= DETECT_INTERVAL) {
@@ -216,8 +205,61 @@ window.onload = () => {
         terminateWorker()
     })
 
-    window.addEventListener('resize', setCanvasFullContainer)
+    const maskCanvas = document.getElementById('maskCanvas')
+    const maskCtx = maskCanvas.getContext('2d')
+    const dpr = window.devicePixelRatio || 1
+
+    const initMask = () => {
+        const viewportWidth = window.innerWidth
+        const viewportHeight = window.innerHeight
+
+        maskCanvas.width = viewportWidth * dpr
+        maskCanvas.height = viewportHeight * dpr
+        maskCanvas.style.width = `${viewportWidth}px`
+        maskCanvas.style.height = `${viewportHeight}px`
+        maskCtx.scale(dpr, dpr)
+
+        const minSide = Math.min(viewportWidth, viewportHeight)
+        const baseLength = minSide * 0.9
+        const triangleHeight = baseLength * (Math.sqrt(3) / 2)
+
+        const point1X = (viewportWidth - baseLength) / 2
+        const point1Y = viewportHeight / 2 + triangleHeight / 3
+        const point2X = (viewportWidth + baseLength) / 2
+        const point2Y = point1Y
+        const point3X = viewportWidth / 2
+        const point3Y = point1Y - triangleHeight
+
+        maskCtx.fillStyle = 'rgba(0, 0, 0, 0.7)'
+        maskCtx.fillRect(0, 0, viewportWidth, viewportHeight)
+
+        maskCtx.save()
+
+        maskCtx.strokeStyle = '#ffffff'
+        maskCtx.lineWidth = 1
+        maskCtx.beginPath()
+        maskCtx.moveTo(point1X, point1Y)
+        maskCtx.lineTo(point2X, point2Y)
+        maskCtx.lineTo(point3X, point3Y)
+        maskCtx.closePath()
+        maskCtx.stroke()
+
+        maskCtx.beginPath()
+        maskCtx.moveTo(point1X, point1Y)
+        maskCtx.lineTo(point2X, point2Y)
+        maskCtx.lineTo(point3X, point3Y)
+        maskCtx.closePath()
+        maskCtx.globalCompositeOperation = 'destination-out'
+        maskCtx.fill()
+        maskCtx.restore()
+    }
 
     initWorker()
     initCamera().then()
+    initMask()
+
+    window.addEventListener('resize', () => {
+        setCanvasFullContainer()
+        initMask()
+    })
 }

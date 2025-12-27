@@ -14,7 +14,7 @@ window.onload = () => {
     let size = 200
     slider.value = size
 
-    let instance = new Generator(
+    let generator = new Generator(
         input.value,
         Number(bits.value),
         size,
@@ -22,15 +22,15 @@ window.onload = () => {
     )
 
     if (!svg.hasChildNodes()) {
-        svg.appendChild(isCanvas ? instance.getCvs() : instance.getSvg())
+        svg.appendChild(isCanvas ? generator.getCvs() : generator.getSvg())
     }
 
     input.addEventListener('input', () => {
-        instance.updateText(input.value)
+        generator.updateText(input.value)
     })
 
     slider.addEventListener('input', () => {
-        instance.updateSize(Number(slider.value))
+        generator.updateSize(Number(slider.value))
     })
 
     let hide = false
@@ -61,7 +61,7 @@ window.onload = () => {
     const toPng = () => {
         const link = document.createElement('a')
         link.download = `tricode-${Date.now()}.png`
-        link.href = instance.getCvs().toDataURL('image/png')
+        link.href = generator.getCvs().toDataURL('image/png')
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -103,7 +103,7 @@ window.onload = () => {
 
     document.querySelectorAll('input[name="bits"]').forEach((checkbox) => {
         checkbox.addEventListener('change', (event) => {
-            instance.updateBits(Number(Number(event.target.value)))
+            generator.updateBits(Number(Number(event.target.value)))
         })
     })
 }

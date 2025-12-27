@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+<canvas id="maskCanvas"></canvas>
+</body>
+<script>
+    const canvas = document.getElementById('maskCanvas');
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+
+    // 2. 定义三角形尺寸（可自定义大小，如边长 200px）
+    const triangleSize = 100; // 三角形半宽/高度，数值越大，三角形越大
+
+    const initMask = () => {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // 1. 适配 DPR 并全屏初始化
+        canvas.width = viewportWidth * dpr;
+        canvas.height = viewportHeight * dpr;
+        canvas.style.width = `${viewportWidth}px`;
+        canvas.style.height = `${viewportHeight}px`;
+        ctx.scale(dpr, dpr);
+
+        // 3. 计算居中三角形的顶点坐标（核心：基于视口宽高的一半计算）
+        const centerX = viewportWidth / 2; // 视口水平中心
+        const centerY = viewportHeight / 2; // 视口垂直中心
+
+        // 居中的▲向上三角形（刚好覆盖视口中心，匹配摄像头焦点）
+        const trianglePoints = [
+            [centerX, centerY - triangleSize], // 顶点（垂直居中上方）
+            [centerX - triangleSize, centerY + triangleSize], // 左底点（水平居中左侧，垂直居中下方）
+            [centerX + triangleSize, centerY + triangleSize]  // 右底点（水平居中右侧，垂直居中下方）
+        ];
+
+        // 若需要居中的▼向下三角形，修改坐标即可：
+        // const trianglePoints = [
+        //   [centerX, centerY + triangleSize], // 顶点（垂直居中下方）
+        //   [centerX - triangleSize, centerY - triangleSize], // 左底点（水平居中左侧，垂直居中上方）
+        //   [centerX + triangleSize, centerY - triangleSize]  // 右底点（水平居中右侧，垂直居中上方）
+        // ];
+
+
+        const minSide = Math.min(viewportWidth, viewportHeight)
+        console.log('minSide', canvas.width, canvas.height, minSide)
+        const baseLength = minSide * 0.9
+        const triangleHeight = baseLength * (Math.sqrt(3) / 2)
+
+        const point1X = (viewportWidth - baseLength) / 2
+        const point1Y = viewportHeight / 2 + triangleHeight / 3
+        const point2X = (viewportWidth + baseLength) / 2
+        const point2Y = point1Y
+        const point3X = viewportWidth / 2
+        const point3Y = point1Y - triangleHeight
+
+
+        // 4. 绘制蒙层 + 清除居中三角形（后续代码不变）
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, viewportWidth, viewportHeight);
+
+        ctx.save();
+
+        ctx.strokeStyle = '#ffffff'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.moveTo(point1X, point1Y)
+        ctx.lineTo(point2X, point2Y)
+        ctx.lineTo(point3X, point3Y)
+        ctx.closePath()
+        ctx.stroke()
+
+        ctx.beginPath();
+        ctx.moveTo(point1X, point1Y)
+        ctx.lineTo(point2X, point2Y)
+        ctx.lineTo(point3X, point3Y)
+        ctx.closePath();
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fill();
+        ctx.restore();
+    }
+
+    initMask()
+
+    window.addEventListener('resize', () => {
+        initMask()
+    });
+</script>
+</html>

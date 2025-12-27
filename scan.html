@@ -27,7 +27,9 @@
         }
 
         #tip {
+            font-size: 1rem;
             position: fixed;
+            z-index: 2;
             top: 10rem;
             width: 100%;
             color: #fff;
@@ -39,11 +41,17 @@
             height: 5rem;
             overflow: scroll;
             position: fixed;
+            z-index: 2;
             bottom: 8rem;
             left: 1rem;
             color: #fff;
             width: calc(100% - 2rem);
             overflow-wrap: break-word;
+        }
+
+        #maskCanvas {
+            position: absolute;
+            z-index: 1;
         }
     </style>
 </head>
@@ -53,8 +61,9 @@
     <video id="webcam" style="display:none;" autoplay muted playsInline></video>
     <div id="canvasContainer">
         <canvas id="canvas"></canvas>
+        <canvas id="maskCanvas"></canvas>
         <div id="tip">請將三角碼置於掃描框</div>
-        <div id="result"></div>
+        <div id="result">1213123121231231233</div>
     </div>
 </div>
 </body>
