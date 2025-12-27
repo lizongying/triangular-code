@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="background: #444444">
+<canvas id="cvs" width="400" height="400"></canvas>
+<canvas id="cvs2" width="400" height="400"></canvas>
+
+<script>
+    const data = [
+        [0],
+        [0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 1, 1, 0, 0],
+        [0, 0, 1, 1, 0, 1, 1, 0, 0],
+        [0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ]
+
+    const canvas = document.getElementById('cvs')
+    // const canvas = document.createElement('canvas')
+    const canvas2 = document.getElementById('cvs2')
+    const ctx = canvas.getContext('2d')
+    const ctx2 = canvas2.getContext('2d')
+
+
+    const dpr = window.devicePixelRatio || 1
+    console.log(dpr)
+    // const ctx = cvs.getContext('2d')
+    // ctx.imageSmoothingEnabled = false
+    // ctx.scale(dpr, dpr)
+
+    // ========== 配置 ==========
+    let unit = Math.floor(400 / (13+1))                 // 最小三角高度
+    const startY = 0
+    const centerX = canvas.width / 2
+
+    const colors = {
+        0: '#ffffff',
+        1: '#000000',
+    }
+
+    function drawUp(ctx, cx, topY, u, color) {
+        ctx.beginPath()
+        ctx.moveTo(cx, topY)
+        ctx.lineTo(cx - u, topY + u)
+        ctx.lineTo(cx + u, topY + u)
+        ctx.closePath()
+        ctx.fillStyle = color
+        ctx.fill()
+    }
+
+    function drawDown(ctx, cx, bottomY, u, color) {
+        ctx.beginPath()
+        ctx.moveTo(cx, bottomY)
+        ctx.lineTo(cx - u, bottomY - u)
+        ctx.lineTo(cx + u, bottomY - u)
+        ctx.closePath()
+        ctx.fillStyle = color
+        ctx.fill()
+    }
+
+    data.forEach((rowData, row) => {
+        const cols = rowData.length
+        const centerCol = (cols - 1) / 2
+        const y = startY + row * unit
+
+        rowData.forEach((v, col) => {
+            const cx = centerX + (col - centerCol) * unit
+            if ((col) % 2 === 0) {
+                // ▲
+                drawUp(ctx, cx, y, unit, colors[v])
+            } else {
+                // ▼
+                drawDown(ctx, cx, y + unit, unit, colors[v])
+            }
+        })
+    })
+
+    ctx2.save();
+    ctx2.setTransform(
+        1, 0, //水平方向 不缩放。垂直方向 不倾斜。
+        0,
+        Math.sqrt(3), // 垂直方向 缩放
+        0, 0         // 无平移
+    );
+    ctx2.drawImage(canvas, 0, 0)
+    ctx2.restore()
+
+    // const link = document.createElement('a')
+    // link.download = `tricode-${Date.now()}.png`
+    // link.href = canvas2.toDataURL('image/png')
+    // document.body.appendChild(link)
+    // link.click()
+    // document.body.removeChild(link)
+</script>
+</body>
+</html>

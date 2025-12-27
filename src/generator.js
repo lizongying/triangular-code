@@ -1,9 +1,10 @@
 /**
  * https://github.com/lizongying/tricode
  */
+import { colors2, colors4, colors8, table2 } from './utils/constants.js'
+
 export class Generator {
-    constructor(container, text = '', bits = 3, size = 200, canvas = false) {
-        this.container = container
+    constructor(text = '', bits = 3, size = 200, withSvg = false) {
         this.scale = Math.sin(this.degreesToRadians(60))
 
         this.text = text
@@ -12,13 +13,37 @@ export class Generator {
 
         this.size = size
 
-        this.canvas = canvas
-
-        this._svgNamespace = 'http://www.w3.org/2000/svg'
-
         this._unitScale = 10
 
+        const cvs = document.createElement('canvas')
+        const ctx = cvs.getContext('2d')
+        ctx.imageSmoothingEnabled = false
+        ctx.globalAlpha = 1
+        this.cvs = cvs
+        this.ctx = ctx
+
+        if (withSvg) {
+            this._svgNamespace = 'http://www.w3.org/2000/svg'
+            const svg = document.createElementNS(this._svgNamespace, 'svg')
+            svg.setAttribute('color-interpolation', `sRGB`)
+            svg.setAttribute('shape-rendering', `crispEdges`)
+            svg.setAttribute(
+                'style',
+                'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;',
+            )
+            this.svg = svg
+        }
+        this.withSvg = withSvg
+
         this.change(true)
+    }
+
+    getCvs() {
+        return this.cvs
+    }
+
+    getSvg() {
+        return this.svg
     }
 
     updateSize(size) {
@@ -37,49 +62,27 @@ export class Generator {
     }
 
     change(resize = false) {
-        if (this.canvas) {
-            let cvs = this.container.querySelector('canvas')
-            if (cvs) {
-                this.ctx.clearRect(0, 0, cvs.width, cvs.height)
-            } else {
-                cvs = document.createElement('canvas')
-                const ctx = cvs.getContext('2d')
-                ctx.imageSmoothingEnabled = false
-                ctx.globalAlpha = 1
-                this.ctx = ctx
+        this.ctx.clearRect(0, 0, this.cvs.width, this.cvs.height)
+        if (resize) {
+            this.cvs.width = this.size * this._unitScale
+            this.cvs.height = this.size * this._unitScale
 
-                this.container.appendChild(cvs)
+            this.cvs.style.width = this.size + 'px'
+            this.cvs.style.height = this.size + 'px'
+        }
+
+        if (this.withSvg) {
+            while (this.svg.firstChild) {
+                this.svg.removeChild(this.svg.firstChild)
             }
             if (resize) {
-                cvs.width = this.size * this._unitScale
-                cvs.height = this.size * this._unitScale
-
-                cvs.style.width = this.size + 'px'
-                cvs.style.height = this.size + 'px'
-            }
-            this._cvs = cvs
-        } else {
-            let svg = this.container.querySelector('svg')
-            if (svg) {
-                while (svg.firstChild) {
-                    svg.removeChild(svg.firstChild)
-                }
-            } else {
-                svg = document.createElementNS(this._svgNamespace, 'svg')
-                svg.setAttribute('color-interpolation', `sRGB`)
-                svg.setAttribute('shape-rendering', `crispEdges`)
-                svg.setAttribute(
-                    'style',
-                    'forced-color-adjust: none; color-scheme: light; color: #FFFFFF; fill: #FFFFFF;',
+                this.svg.setAttribute('width', `${this.size}`)
+                this.svg.setAttribute('height', `${this.size}`)
+                this.svg.setAttribute(
+                    'viewBox',
+                    `0 0 ${this.size} ${this.size}`,
                 )
-                this.container.appendChild(svg)
             }
-            if (resize) {
-                svg.setAttribute('width', `${this.size}`)
-                svg.setAttribute('height', `${this.size}`)
-                svg.setAttribute('viewBox', `0 0 ${this.size} ${this.size}`)
-            }
-            this._svg = svg
         }
 
         this.encode()
@@ -238,7 +241,7 @@ export class Generator {
      */
     getRequiredVersion(dataLength) {
         // Iterate through all tricode versions and their capacities
-        for (const [versionStr, capacity] of Object.entries(table)) {
+        for (const [versionStr, capacity] of Object.entries(table2)) {
             const version = Number(versionStr) // Convert version to number (since Object.entries returns strings)
 
             // Return the first version that can accommodate the data length
@@ -250,7 +253,7 @@ export class Generator {
         // If no version is found (data is too long for all supported versions)
         throw new Error(
             `Data length (${dataLength}) exceeds the maximum supported tricode capacity. ` +
-                `Maximum supported capacity: ${Math.max(...Object.values(table))}`,
+                `Maximum supported capacity: ${Math.max(...Object.values(table2))}`,
         )
     }
 
@@ -353,16 +356,17 @@ export class Generator {
             let b = [x - one, y0]
             let c = [x, y0]
 
-            v.forEach((vv, ii) => {
+            v.forEach((vv, j) => {
                 b = a
                 a = c
-                if (ii % 2 === 0) {
-                    c = [x + (ii * one) / 2 + one / 2, y1]
+                const up = (j & 1) === 0
+                if (up) {
+                    c = [x + (j * one) / 2 + one / 2, y1]
                 } else {
-                    c = [x + (ii * one) / 2 + one / 2, y0]
+                    c = [x + (j * one) / 2 + one / 2, y0]
                 }
 
-                let colors = colors2
+                let colors
                 switch (this.bits) {
                     case 3: {
                         colors = colors8
@@ -377,24 +381,15 @@ export class Generator {
                     }
                 }
 
-                if (this.canvas) {
-                    drawTriangle(
-                        this.ctx,
-                        [
-                            a[0] * this._unitScale,
-                            a[1] * this.scale * this._unitScale,
-                        ],
-                        [
-                            b[0] * this._unitScale,
-                            b[1] * this.scale * this._unitScale,
-                        ],
-                        [
-                            c[0] * this._unitScale,
-                            c[1] * this.scale * this._unitScale,
-                        ],
-                        argbToHex(colors[vv]),
-                    )
-                } else {
+                drawTriangle(
+                    this.ctx,
+                    a.map((v) => v * this._unitScale),
+                    b.map((v) => v * this._unitScale),
+                    c.map((v) => v * this._unitScale),
+                    argbToHex(colors[vv]),
+                    up,
+                )
+                if (this.withSvg) {
                     const triangle = document.createElementNS(
                         this._svgNamespace,
                         'polygon',
@@ -404,64 +399,42 @@ export class Generator {
                         `${a.join(',')} ${b.join(',')} ${c.join(',')}`,
                     )
                     triangle.setAttribute('fill', argbToHex(colors[vv]))
-                    this._svg.appendChild(triangle)
+                    this.svg.appendChild(triangle)
                 }
             })
         })
     }
 }
 
-const drawTriangle = (ctx, a, b, c, color) => {
-    const [ax, ay] = a.map((v) => Math.round(v))
-    const [bx, by] = b.map((v) => Math.round(v))
-    const [cx, cy] = c.map((v) => Math.round(v))
+// const DPR = window.devicePixelRatio || 1
+// const OVERLAP = 1 / DPR / 2
+const OVERLAP = 1
 
+const drawTriangle = (ctx, a, b, c, color, up = true) => {
+    const [ax, ay] = a
+    const [bx, by] = b
+    const [cx, cy] = c
+
+    ctx.save()
     ctx.beginPath()
-    ctx.moveTo(ax, ay)
-    ctx.lineTo(bx, by)
-    ctx.lineTo(cx, cy)
+    const hypotenuseExpand = Math.sqrt(OVERLAP * OVERLAP * 2)
+    if (up) {
+        ctx.moveTo(ax, ay - hypotenuseExpand)
+        ctx.lineTo(bx - OVERLAP, by + OVERLAP)
+        ctx.lineTo(cx + OVERLAP, cy + OVERLAP)
+    } else {
+        ctx.moveTo(ax, ay + hypotenuseExpand)
+        ctx.lineTo(bx - OVERLAP, by - OVERLAP)
+        ctx.lineTo(cx + OVERLAP, cy - OVERLAP)
+    }
+
     ctx.closePath()
 
+    ctx.imageSmoothingEnabled = false
     ctx.fillStyle = color
     ctx.fill()
+    ctx.restore()
 }
-
-// (x-5)/2 * (x-5)/2-50
-// ((x-5)/2)**2 -50
-// 25*2+13=63
-const table = {
-    23: 32 - 4, //5
-    33: 146 - 4, //14-4 = 10
-    43: 311 - 4, //19-4 = 15
-    53: 526 - 4, //24-4 = 20
-    63: 791 - 4, //29-4 = 25
-    73: 1106 - 4,
-    83: 1471 - 4,
-    93: 1886 - 4,
-}
-
-const colors2 = [
-    0xffffff, //white
-    0x000000, //black
-]
-
-const colors4 = [
-    0xffffff, // white
-    0x0000ff, // blue
-    0x00ff00, // green
-    0xff0000, // red
-]
-
-const colors8 = [
-    0xffffff, //white
-    0xff0000, //red
-    0x00ff00, //green
-    0x0000ff, //blue
-    0xffff00, //yellow
-    0x00ffff, //cyan
-    0xff00ff, //magenta
-    0x000000, //black
-]
 
 const argbToHex = (argb) => {
     const hex = (argb & 0xffffff).toString(16).padStart(6, '0')

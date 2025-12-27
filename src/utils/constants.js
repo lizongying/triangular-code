@@ -13,16 +13,19 @@ export const table = {
     40: 93,
 }
 
-// const table2 = {
-//     23: 32, //5
-//     33: 146, //14-4 = 10
-//     43: 311, //19-4 = 15
-//     53: 526, //24-4 = 20
-//     63: 791, //29-4 = 25
-//     73: 1106,
-//     83: 1471,
-//     93: 1886,
-// }
+// (x-5)/2 * (x-5)/2-50
+// ((x-5)/2)**2 -50
+// 25*2+13=63
+export const table2 = {
+    23: 32 - 4, //5
+    33: 146 - 4, //14-4 = 10
+    43: 311 - 4, //19-4 = 15
+    53: 526 - 4, //24-4 = 20
+    63: 791 - 4, //29-4 = 25
+    73: 1106 - 4,
+    83: 1471 - 4,
+    93: 1886 - 4,
+}
 
 export const table3 = {
     23: 5,
@@ -35,6 +38,13 @@ export const table3 = {
     93: 40,
 }
 
+export const RGB_PALETTE_4COLORS = [
+    { name: 'white', index: 0, rgb: [255, 255, 255], hex: 0xffffff },
+    { name: 'blue', index: 1, rgb: [0, 0, 255], hex: 0x0000ff },
+    { name: 'green', index: 2, rgb: [0, 255, 0], hex: 0x00ff00 },
+    { name: 'red', index: 3, rgb: [255, 0, 0], hex: 0xff0000 },
+]
+
 export const RGB_PALETTE_8COLORS = [
     { name: 'white', index: 0, rgb: [255, 255, 255], hex: 0xffffff },
     { name: 'red', index: 1, rgb: [255, 0, 0], hex: 0xff0000 },
@@ -46,9 +56,25 @@ export const RGB_PALETTE_8COLORS = [
     { name: 'black', index: 7, rgb: [0, 0, 0], hex: 0x000000 },
 ]
 
-export const RGB_PALETTE_4COLORS = [
-    { name: 'white', index: 0, rgb: [255, 255, 255], hex: 0xffffff },
-    { name: 'blue', index: 1, rgb: [0, 0, 255], hex: 0x0000ff },
-    { name: 'green', index: 2, rgb: [0, 255, 0], hex: 0x00ff00 },
-    { name: 'red', index: 3, rgb: [255, 0, 0], hex: 0xff0000 },
+export const colors2 = [
+    0xffffff, //white
+    0x000000, //black
+]
+
+export const colors4 = [
+    0xffffff, // white
+    0x0000ff, // blue
+    0x00ff00, // green
+    0xff0000, // red
+]
+
+export const colors8 = [
+    0xffffff, //white
+    0xff0000, //red
+    0x00ff00, //green
+    0x0000ff, //blue
+    0xffff00, //yellow
+    0x00ffff, //cyan
+    0xff00ff, //magenta
+    0x000000, //black
 ]
